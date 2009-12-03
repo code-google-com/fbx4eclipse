@@ -177,7 +177,7 @@ void KFbxLog::LogMsgV( KFbxLogLevel level, const char* format, va_list args )
 }
 
 void KFbxLog::LogError( const wchar_t* format, ... )
-{
+{	
 	if (!IsErrorEnabled()) return;
 	va_list args;
 	va_start(args, format);

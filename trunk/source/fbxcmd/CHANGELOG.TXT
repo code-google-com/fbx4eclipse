@@ -1,8 +1,12 @@
-             tazpn's DAO Tools 1.2
+             tazpn's DAO Tools 1.3
              =====================
 
 Change log
 ----------
+1.3
+-----   
+ - Avoid crash when texture not found in model viewer
+ - Initial support for .MMH.XML and .MSH.XML files.
 
 1.2
 -----   

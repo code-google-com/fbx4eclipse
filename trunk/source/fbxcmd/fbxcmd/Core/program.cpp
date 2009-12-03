@@ -402,7 +402,7 @@ Program::Program(int argc, char **argv, bool zeroargs)
 	if (!infile.empty() && outfile.empty()) {
 		char path[MAX_PATH], drive[MAX_PATH], dir[MAX_PATH], fname[MAX_PATH], ext[MAX_PATH];
 		_splitpath(infile.c_str(), drive, dir, fname, ext);
-		strcat(fname, "-out");
+		strcat(fname, "_out");
 		_makepath(path, drive, dir, fname, ext);
 		outfile = path;
 	}

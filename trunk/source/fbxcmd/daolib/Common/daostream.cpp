@@ -30,7 +30,7 @@ void DAOStream::Open(const TCHAR *file, bool readonly)
 	}
 	else
 	{
-		fh = _tfopen(file, readonly ? _T("rbR") : _T("wbR"));
+		fh = _tfopen(file, readonly ? _T("rbR") : _T("wbS"));
 		if (!fh) {
 			throw runtime_error(FormatStringA("Unable to open file: %s", file));
 		}
@@ -41,6 +41,7 @@ void DAOStream::Open(const TCHAR *file, bool readonly)
 void DAOStream::Close()
 {
 	if (fh) {
+		fflush(fh);
 		fclose(fh);
 		fh = NULL;
 	}

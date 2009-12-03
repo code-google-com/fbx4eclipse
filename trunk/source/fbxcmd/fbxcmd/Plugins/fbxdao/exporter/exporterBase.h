@@ -25,8 +25,8 @@ public:
 	KFbxScene* lScene;
 	KFbxStreamOptions* pStreamOptions;
 	KFbxSdkManager *mManager;
-	DAOStreamPtr pFile;
+	Text filename;
 
 	//////////////////////////////////////////////////////////////////////////
-	ExporterBase(DAOWriter *owner, KFbxScene* scene, KFbxStreamOptions* options, DAOStreamPtr pFile);
+	ExporterBase(DAOWriter *owner, KFbxScene* scene, KFbxStreamOptions* options, LPCSTR filename);
 };

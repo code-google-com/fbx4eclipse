@@ -3,6 +3,7 @@
 #include "../plugins/fbxcmn/KFbxLog.h"
 using namespace std;
 
+#pragma region ConsoleLogger
 class ConsoleLogger : public ILogListener
 {
 	HANDLE  hError;
@@ -51,7 +52,7 @@ public:
 		}
 	}
 };
-
+#pragma endregion
 
 // to get a file extention for a WriteFileFormat
 const char *GetFileFormatExt(KFbxSdkManager* pSdkManager, const int pWriteFileFormat)
@@ -61,7 +62,6 @@ const char *GetFileFormatExt(KFbxSdkManager* pSdkManager, const int pWriteFileFo
 
 bool SaveScene(KFbxSdkManager* pSdkManager, KFbxDocument* pScene, const char* pFilename,  const char * pFileFormat=NULL, bool pEmbedMedia=false)
 {
-	int lMajor, lMinor, lRevision;
 	bool lStatus = true;
 
 	int lFileFormat = -1;
@@ -103,21 +103,18 @@ bool SaveScene(KFbxSdkManager* pSdkManager, KFbxDocument* pScene, const char* pF
 		return false;
 	}
 
-	KFbxIO::GetCurrentVersion(lMajor, lMinor, lRevision);
-	KFbxLog::LogDebug("FBX version number for this version of the FBX SDK is %d.%d.%d", lMajor, lMinor, lRevision);
-
 	// Set the file format
 	if( lFileFormat < 0 || lFileFormat >= pSdkManager->GetIOPluginRegistry()->GetWriterFormatCount() )
 	{
-		if ( LPSTR fileext = PathFindExtension(pFilename) )
+		int len = strlen(pFilename);
+		for(int i=0; i < nbWriters; i++)
 		{
-			if (fileext[0] == '.') ++fileext;
-
-			for(int i=0; i < nbWriters; i++)
-			{
-				if ( LPCSTR ext = pRegistry->GetWriterFormatExtension(i) ){
-					if (stricmp(ext, fileext) == 0) {
-
+			if ( LPCSTR ext = pRegistry->GetWriterFormatExtension(i) ){
+				int extlen = strlen(ext);
+				if (len > extlen) {
+					LPCSTR fileext = pFilename + len - extlen;
+					if ((fileext[-1] == '.') && (stricmp(fileext, ext) == 0))
+					{
 						if ( pSdkManager->GetIOPluginRegistry()->WriterIsFBX(i) )
 						{
 							if (!pEmbedMedia)
@@ -439,7 +436,7 @@ static bool ExecuteCmd(Program &prog)
 	if (outfile.empty()) {
 		char path[MAX_PATH], drive[MAX_PATH], dir[MAX_PATH], fname[MAX_PATH], ext[MAX_PATH];
 		_splitpath(infile.c_str(), drive, dir, fname, ext);
-		strcat(fname, "-out");
+		strcat(fname, "_out");
 		_makepath(path, drive, dir, fname, ".fbx");
 		GetFullPathName(path, _countof(path), path, NULL);
 		outfile = path;

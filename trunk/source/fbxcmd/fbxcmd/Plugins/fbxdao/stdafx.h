@@ -28,17 +28,6 @@
 
 #include <fbxsdk.h>
 
-#if 0
-namespace {
-extern "C"
-{
-#include "win32config.h"
-#include <libxml/xmlmemory.h>
-#include <libxml/parser.h>
-}
-}
-#endif
-
 #include "GFFFormat.h"
 #include "MSHFormat.h"
 #include "MMHFormat.h"

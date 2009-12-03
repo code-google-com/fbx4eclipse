@@ -18,7 +18,7 @@ HISTORY:
 * Define the major, minor, build, patch version numbers
 */
 #define VERSION_MAJOR_INT  1
-#define VERSION_MINOR_INT  2
+#define VERSION_MINOR_INT  3
 #define VERSION_BUILD_INT  0
 
 #ifndef DAOTOOLS_REVISION_INT
@@ -28,9 +28,9 @@ HISTORY:
 #endif
 
 #ifndef DAOTOOLS_REVISION
-#define VERSION_STRING "1, 2, 0, 0"
+#define VERSION_STRING "1, 3, 0, 0"
 #else
-#define VERSION_STRING "1, 2, 0, " DAOTOOLS_REVISION
+#define VERSION_STRING "1, 3, 0, " DAOTOOLS_REVISION
 #endif
 
 #define COPYRIGHTYEARINT 2009
