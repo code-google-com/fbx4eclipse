@@ -16,9 +16,11 @@
 #include <numeric>
 #include <vector>
 #include <list>
-#include <map>
 #include <deque>
 #include <sstream>
+#include <string>
+#include <set>
+
 using std::runtime_error;
 
 // _WIN32 will detect windows on most compilers
@@ -61,5 +63,10 @@ using std::runtime_error;
 #include "objectParams.h"
 #undef ALPHA_NONE
 
+#include <fbxsdk.h>
+#include "../fbxcmd/plugins/fbxcmn/KFbxLog.h"
+
 #include "niutils.h"
+
+#include "ResourceManager.h"
 #endif

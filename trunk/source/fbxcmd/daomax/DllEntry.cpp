@@ -19,6 +19,9 @@ extern ClassDesc2* GetDAOExportDesc();
 extern ClassDesc2* GetMSHUtilityDesc();
 
 static void InitializeLibSettings();
+extern "C" void InitializeFbxSettings();
+extern "C" void FreeFbxSettings();
+extern "C" bool IsFbxInitialized();
 
 HINSTANCE hInstance;
 static int controlsInit = FALSE;
@@ -41,14 +44,19 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 		InitCustomControls(hInstance);	// Initialize MAX's custom controls
 		InitCommonControls();			// Initialize Win95 controls
 	}
-   if (fdwReason == DLL_PROCESS_ATTACH)
-      InitializeLibSettings();
-			
+	if (fdwReason == DLL_PROCESS_ATTACH)
+		InitializeLibSettings();
+	if (fdwReason == DLL_PROCESS_DETACH)
+		FreeFbxSettings();
+
 	return (TRUE);
 }
 
 void InitializeLibSettings()
 {
+	__try { InitializeFbxSettings(); }
+	__except (EXCEPTION_EXECUTE_HANDLER) { }
+
    Interface *gi = GetCOREInterface();
    TCHAR iniName[MAX_PATH];
    GetModuleFileName(NULL, iniName, _countof(iniName));
@@ -69,11 +77,14 @@ void InitializeLibSettings()
 
    nClasses = 0;
 
-   if ( GetIniValue<bool>("MSHImport", "Enable", true, iniName) ) {
-      classDescriptions[nClasses++] = GetDAOImportDesc();
-   }
-   if ( GetIniValue<bool>("MSHExport", "Enable", true, iniName) ) {
-      classDescriptions[nClasses++] = GetDAOExportDesc();
+   if (IsFbxInitialized())
+   {
+	   if ( GetIniValue<bool>("MSHImport", "Enable", true, iniName) ) {
+		   classDescriptions[nClasses++] = GetDAOImportDesc();
+	   }
+	   if ( GetIniValue<bool>("MSHExport", "Enable", true, iniName) ) {
+		   classDescriptions[nClasses++] = GetDAOExportDesc();
+	   }
    }
    //if ( GetIniValue<bool>("MSHUtility", "EnableMSHUtility", true, iniName) ) {
    //   classDescriptions[nClasses++] = GetMSHUtilityDesc();

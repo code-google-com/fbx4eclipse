@@ -1,18 +1,21 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioPropertySheet
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="Max_System_Win32"
-    InheritedPropertySheets=".\Max_System_Default.vsprops"
+	InheritedPropertySheets=".\Max_System_Default.vsprops"
 	>
 	<Tool
 		Name="VCCLCompilerTool"
-        PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0500"
+		PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0500"
 	/>
-  
 	<Tool
 		Name="VCLinkerTool"
-        AdditionalOptions="/MACHINE:I386"
-        AdditionalLibraryDirectories="$(MaxSDKDir)\lib"
-    />
+		AdditionalOptions="/MACHINE:I386"
+		AdditionalLibraryDirectories="$(MaxSDKDir)\lib"
+	/>
+	<Tool
+		Name="VCPostBuildEventTool"
+		CommandLine="echo xcopy /y &quot;$(SolutionDir)Staging\$(PlatformName)\$(BuildType)\*.dll&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;xcopy /d /s /y &quot;$(SolutionDir)Staging\$(PlatformName)\$(BuildType)\*.dll&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;xcopy /d /s /y &quot;$(SolutionDir)Staging\$(PlatformName)\$(BuildType)\*.ini&quot; &quot;$(TargetDir)&quot;"
+	/>
 </VisualStudioPropertySheet>

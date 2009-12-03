@@ -139,40 +139,13 @@ void PosRotScaleNode(KFbxNode *n, KFbxVector4 & p, KFbxQuaternion& q, float s, P
 void PosRotScaleNode(KFbxNode *n, KFbxVector4 & p, KFbxQuaternion& q, KFbxVector4 & s, PosRotScale prs = prsDefault);
 void PosRotScaleNode(KFbxNode *n, KFbxXMatrix& m3, PosRotScale prs = prsDefault);
 
-#if 0
-inline KFbxXMatrix ToMatrix3(const Matrix44& mx)
+static inline KFbxQuaternion ComposeSphericalXYZ(KFbxVector4 lR)
 {
-	KFbxVector4 u(mx[0][0], mx[0][1], mx[0][2]);
-	KFbxVector4 v(mx[1][0], mx[1][1], mx[1][2]);
-	KFbxVector4 n(mx[2][0], mx[2][1], mx[2][2]);
-	KFbxVector4 t(mx[3][0], mx[3][1], mx[3][2]);
-	return KFbxXMatrix(u, v, n, t);
+	KFbxVector4 lT(0,0,0,0);
+	KFbxVector4 lS(1,1,1,0);
+	KFbxXMatrix m(lT, lR, lS);
+	Matrix44 m4 = TOMATRIX4(m);
+	Vector3f pos; Quaternion rot; Vector3f scl;
+	m4.Decompose(pos, rot, scl);
+	return KFbxQuaternion(rot.x, rot.y, rot.z, rot.w);
 }
-
-inline Matrix44 ToMatrix44(const KFbxXMatrix& mx)
-{
-	Matrix44 fm;
-	fm[0][0] = mx[0][0]; fm[1][0] = mx[1][0]; fm[2][0] = mx[2][0]; fm[3][0] = mx[3][0];
-	fm[0][1] = mx[0][1]; fm[1][1] = mx[1][1]; fm[2][1] = mx[2][1]; fm[3][1] = mx[3][1];
-	fm[0][2] = mx[0][2]; fm[1][2] = mx[1][2]; fm[2][2] = mx[2][2]; fm[3][2] = mx[3][2];
-	fm[0][3] = fm[1][3] = fm[2][3] = 0.0f; fm[3][3] = 1.0f;
-	return fm;
-}
-
-inline KFbxVector4 ToKFbxVector4(const Vector3f& p) { return KFbxVector4(p.x, p.y, p.z); }
-inline Point4 ToPoint4(const Vector4f& p) { return Point4(p.x, p.y, p.z, p.w); }
-inline KFbxColor ToColor(const Vector3f& p) { return KFbxColor(p.x, p.y, p.z); }
-inline KFbxColor ToColor(const Vector4f& p) { return KFbxColor(p.x, p.y, p.z); }
-inline Color4 ToColor4(const Vector4f& p) { return Color4(p.x, p.y, p.z, p.w); }
-
-inline bool IsEquivalent(const Vector3f& p1, const KFbxVector4& p2) { return IsEquivalent(p1.x, p2.x) && IsEquivalent(p1.y, p2.y) && IsEquivalent(p1.z, p2.z); }
-
-inline Vector3f ToVector3(const KFbxVector4& p) { return Vector3f(p.x, p.y, p.z); }
-inline Vector3f ToVector3(const Point4& p) { return Vector3f(p.x, p.y, p.z); }
-inline Vector3f ToVector3(const KFbxColor& c) { return Vector3f(c.r, c.g, c.b); }
-inline Vector4f ToVector4(const Point4& p) { return Vector4f(p.x, p.y, p.z, p.w); }
-inline Vector4f ToVector4(const KFbxColor& c) { return Vector4f(c.r, c.g, c.b, 1.0f); }
-inline Vector4f ToVector4(const Color4& c) { return Vector4f(c.r, c.g, c.b, c.a); }
-inline Vector4f ToVector4(const KFbxVector4& p) { return Vector4f(p.x, p.y, p.z, 1.0f); }
-
-#endif

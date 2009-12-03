@@ -196,13 +196,13 @@ public:
 		return sz;
 	}
 };
-FbxCmdMemoryAllocator* pAllocator;
+FbxCmdMemoryAllocator* k_pAllocator;
 
 void InitializeSdkObjects(KFbxSdkManager*& pSdkManager, KFbxScene*& pScene)
 {
-	pAllocator = new FbxCmdMemoryAllocator();
+	k_pAllocator = new FbxCmdMemoryAllocator();
 
-	KFbxSdkManager::SetMemoryAllocator(pAllocator);
+	KFbxSdkManager::SetMemoryAllocator(k_pAllocator);
 
     // The first thing to do is to create the FBX SDK manager which is the 
     // object allocator for almost all the classes in the SDK.
@@ -259,7 +259,7 @@ void InitializeSdkObjects(KFbxSdkManager*& pSdkManager, KFbxScene*& pScene)
 						int nReaders = 0, nWriters = 0;
 						ReaderFunctions* readers = NULL;
 						WriterFunctions* writers = NULL;
-						int n = registerPlugins(pSdkManager, pAllocator, &nReaders, &readers, &nWriters, &writers);
+						int n = registerPlugins(pSdkManager, k_pAllocator, &nReaders, &readers, &nWriters, &writers);
 						int firstPluginID, count;
 						for (int i=0; i<nReaders; ++i){
 							pRegistry->RegisterReader(readers[i].createFuncType, readers[i].getInfoFuncType, firstPluginID, count, readers[i].ioSettingsFillerFuncType);
@@ -267,8 +267,8 @@ void InitializeSdkObjects(KFbxSdkManager*& pSdkManager, KFbxScene*& pScene)
 						for (int i=0; i<nWriters; ++i){
 							pRegistry->RegisterWriter(writers[i].createFuncType, writers[i].getInfoFuncType, firstPluginID, count, writers[i].ioSettingsFillerFuncType);
 						}
-						pAllocator->mFreeHandler(readers);
-						pAllocator->mFreeHandler(writers);
+						k_pAllocator->mFreeHandler(readers);
+						k_pAllocator->mFreeHandler(writers);
 						k_plugins.insert(hLib);
 					} else {
 						FreeLibrary(hLib);

@@ -12,10 +12,6 @@ HISTORY:
 **********************************************************************/
 #pragma once
 
-class IBipMaster;
-extern IBipMaster * (_cdecl * Max8CreateNewBiped)(float,float,class Vector3f const &,int,int,int,int,int,int,int,int,int,int,int,int,float,int,int,int,int,int,int,int,int);
-extern IBipMaster * (_cdecl * Max7CreateNewBiped)(float,float,class Vector3f const &,int,int,int,int,int,int,int,int,int,int,int,int,float,int,int,int,int);
-
 // Importer Base
 class BaseImporter
 {

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="FBXLib_Settings"
+	>
+	<Tool
+		Name="VCLinkerTool"
+		AdditionalDependencies="fbxcmn.lib"
+		AdditionalLibraryDirectories="$(SolutionDir)Staging\$(PlatformName)\$(BuildType)\"
+		DelayLoadDLLs="fbxcmn.dll"
+	/>
+</VisualStudioPropertySheet>

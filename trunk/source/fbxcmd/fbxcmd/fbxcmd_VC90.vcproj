@@ -19,7 +19,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			ConfigurationType="1"
-			InheritedPropertySheets=".\Sheets\fbx_Settings.vsprops;..\Sheets\Default_Settings.vsprops"
+			InheritedPropertySheets=".\Sheets\fbx_Settings.vsprops;..\Sheets\Default_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops;.\Sheets\Debug_Settings.vsprops"
 			CharacterSet="0"
 			>
 			<Tool
@@ -98,8 +98,9 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets=".\Sheets\fbx_Settings.vsprops;..\Sheets\Default_Settings.vsprops"
+			InheritedPropertySheets=".\Sheets\fbx_Settings.vsprops;..\Sheets\Default_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops;.\Sheets\Release_Settings.vsprops"
 			WholeProgramOptimization="1"
 			>
 			<Tool

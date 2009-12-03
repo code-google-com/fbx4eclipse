@@ -58,6 +58,11 @@ public:
 
 	void ExportMaterialObject( KFbxMesh* pMesh, LPCTSTR matName, LPCTSTR texName);
 	bool GetDiffuseMaterialAndTextureName(KFbxLayerContainer* lLayerContainer, Text &matName, Text& texName);
+
+	int GetFirstFreeBone();
+	void BuildBoneMap(KFbxNode* lNode);
+
+	void AddBoneIndex( KFbxNode* lNode, bool force );
 	//////////////////////////////////////////////////////////////////////////
 
 	AppSettings exportSettings;
@@ -65,7 +70,40 @@ public:
 	DAOStreamPtr mmhfile, mshfile;
 	Text mshfname, mmhfname;
 	bool flipUV;
+
+	typedef std::map<KFbxNode*, int> Node2IndexMap;
+	typedef std::vector<KFbxNode*> Index2NodeMap;
+
+	Node2IndexMap node2Index;
+	Index2NodeMap index2Node;
+	Text currentId;
+
+	Text GetNextId();
 };
+
+template <class T>
+inline fbxVectorTemplate3<T> CalcDim(const fbxVectorTemplate3<T>& arg1, const fbxVectorTemplate3<T>& arg2)
+{
+	return fbxVectorTemplate3<T>((T)abs(arg2[0]-arg1[0]), (T)abs(arg2[1]-arg1[1]), (T)abs(arg2[2]-arg1[2]) );
+}
+
+template <class T>
+inline fbxVectorTemplate3<T> CalcMid(const fbxVectorTemplate3<T>& arg1, const fbxVectorTemplate3<T>& arg2)
+{
+	return fbxVectorTemplate3<T>((T)((arg2[0]+arg1[0])/(T)2), (T)((arg2[1]+arg1[1])/(T)2), (T)((arg2[2]+arg1[2])/(T)2) );
+}
+template <class T>
+inline fbxVectorTemplate4<T> CalcDim(const fbxVectorTemplate4<T>& arg1, const fbxVectorTemplate4<T>& arg2)
+{
+	return fbxVectorTemplate4<T>((T)abs(arg2[0]-arg1[0]), (T)abs(arg2[1]-arg1[1]), (T)abs(arg2[2]-arg1[2]), (T)abs(arg2[3]-arg1[3]) );
+}
+
+template <class T>
+inline fbxVectorTemplate4<T> CalcMid(const fbxVectorTemplate4<T>& arg1, const fbxVectorTemplate4<T>& arg2)
+{
+	return fbxVectorTemplate4<T>((T)((arg2[0]+arg1[0])/(T)2), (T)((arg2[1]+arg1[1])/(T)2), (T)((arg2[2]+arg1[2])/(T)2), (T)((arg2[3]+arg1[3])/(T)2)  );
+}
+
 
 
 bool DAOWriter::WriteMMH( KFbxDocument* pDocument, KFbxStreamOptions* pStreamOptions, LPCSTR filename )
@@ -89,6 +127,7 @@ MMHExportImpl::MMHExportImpl( DAOWriter *owner, KFbxScene* scene, KFbxStreamOpti
 	, mmhfile(NULL), mshfile(NULL)
 {
 	Text name;
+	currentId = "_a";
 
 	flipUV = GetProp<bool>("FlipUV", true);
 
@@ -170,6 +209,8 @@ bool MMHExportImpl::DoExport()
 	mshwriter->WriteAttribute("Version", "1");
 
 	KFbxNode* lRoot = lScene->GetRootNode();
+	BuildBoneMap(lRoot);
+
 	// Skip scene if first and only child is named GOB
 	if (lRoot->GetChildCount() == 1) {
 		//LPCSTR name = lRoot->GetChildName(0);
@@ -248,7 +289,7 @@ void MMHExportImpl::ExportNode(KFbxNode* lNode, LPCTSTR name, bool bbox)
 
 	mmhwriter->StartElement("Node");
 	mmhwriter->WriteAttribute("Name", name);
-	mmhwriter->WriteAttribute("SoundMaterialType", "0");
+	//mmhwriter->WriteAttribute("SoundMaterialType", "0");
 
 	mmhwriter->StartElement("Export");
 	mmhwriter->WriteFormatAttribute("TagName", "%sTranslation", name);
@@ -267,8 +308,9 @@ void MMHExportImpl::ExportNode(KFbxNode* lNode, LPCTSTR name, bool bbox)
 	if ( bbox && CalcBoundingBox(lNode, min, max) )
 	{
 		Text sstr;
-		sstr.AppendFormat("%g %g %g %g ", (double)min[0], (double)min[1], (double)min[2], 1.0);
-		sstr.AppendFormat("%g %g %g %g ", (double)max[0], (double)max[1], (double)max[2], 1.0);
+		sstr.AppendFormat("%g %g %g %g %g %g %g %g"
+			, (double)min[0], (double)min[1], (double)min[2], 1.0
+			, (double)max[0], (double)max[1], (double)max[2], 1.0);
 		mmhwriter->StartElement("BoundingBox");
 		mmhwriter->WriteCDATA(sstr);
 		mmhwriter->EndElement();
@@ -277,7 +319,7 @@ void MMHExportImpl::ExportNode(KFbxNode* lNode, LPCTSTR name, bool bbox)
 	lNode->GetDefaultT(lT);
 	lNode->GetDefaultR(lR);
 	lNode->GetDefaultS(lS);
-	KFbxQuaternion q; q.ComposeSphericalXYZ(lR);
+	KFbxQuaternion q = ComposeSphericalXYZ(lR);
 
 	//KFbxXMatrix qm;
 	//qm.SetR(lR);
@@ -285,12 +327,12 @@ void MMHExportImpl::ExportNode(KFbxNode* lNode, LPCTSTR name, bool bbox)
 	//
 	{
 		mmhwriter->StartElement("Translation");
-		mmhwriter->WriteFormatCDATA("%g %g %g %g ", (double)lT[0], (double)lT[1], (double)lT[2], 1.0);
+		mmhwriter->WriteFormatCDATA("%g %g %g %g", (double)lT[0], (double)lT[1], (double)lT[2], 1.0);
 		mmhwriter->EndElement();
 	}
 	{
 		mmhwriter->StartElement("Rotation");
-		mmhwriter->WriteFormatCDATA("%g %g %g %g ", (double)q[0], (double)q[1], (double)q[2], (double)q[3]);
+		mmhwriter->WriteFormatCDATA("%g %g %g %g", (double)q[0], (double)q[1], (double)q[2], (double)q[3]);
 		mmhwriter->EndElement();
 	}
 
@@ -309,6 +351,49 @@ void MMHExportImpl::ExportSkeleton( KFbxSkeleton* lSkel, LPCSTR name )
 
 	mmhwriter->StartElement("Node");
 	mmhwriter->WriteAttribute("Name", name);
+	int iBoneIndex = ~0;
+	Node2IndexMap::iterator itr = node2Index.find(lNode);
+	if (itr != node2Index.end())
+	{
+		iBoneIndex = (*itr).second;
+		if (iBoneIndex < 0)
+			iBoneIndex = ~iBoneIndex;
+	}	
+	if (iBoneIndex >= 0)
+	{
+		mmhwriter->WriteFormatAttribute("BoneIndex", "%d", iBoneIndex);
+	}
+
+	KFbxVector4 min, max;
+	if ( CalcBoundingBox(lNode, min, max) )
+	{
+		fbxDouble3 bdim = CalcDim(min, max);
+		fbxDouble3 bmid = CalcMid(min, max);
+
+		KFbxVector4 lT, lR, lS;
+		lNode->GetDefaultR(lR);
+		KFbxQuaternion q = ComposeSphericalXYZ(lR);
+
+		mmhwriter->StartElement("CollisionObject");
+		mmhwriter->WriteAttribute( "Kinematic", "true");
+		{
+			mmhwriter->StartElement("Shape");
+			mmhwriter->WriteFormatAttribute( "Name", "Box_%s", name );
+			mmhwriter->WriteAttribute("Type", "Box");
+			mmhwriter->WriteAttribute("AllowEmitterSpawn", "1");
+			mmhwriter->WriteAttribute("Fadeable", "false");
+			mmhwriter->WriteFormatAttribute("DimY", "%g", bdim[1]);
+			mmhwriter->WriteFormatAttribute("DimZ", "%g", bdim[2]);
+			mmhwriter->WriteFormatAttribute("DimX", "%g", bdim[0]);
+			mmhwriter->WriteAttribute("GROUP_MASK_PLACEABLES", "true");
+			mmhwriter->WriteAttribute("GROUP_MASK_WALKABLE", "false");
+			mmhwriter->WriteAttribute("GROUP_MASK_NONWALKABLE", "true");
+			mmhwriter->WriteFormatAttribute("Rotation", "%g %g %g %g", (double)q[0], (double)q[1], (double)q[2], (double)q[3]);
+			mmhwriter->WriteFormatAttribute("Position", "%g %g %g %g", (double)bmid[0], (double)bmid[1], (double)bmid[2], 1.0);
+			mmhwriter->EndElement();
+		}
+		mmhwriter->EndElement();
+	}
 	//mmhwriter->WriteAttribute("SoundMaterialType", "0");
 
 	mmhwriter->StartElement("Export");
@@ -327,16 +412,16 @@ void MMHExportImpl::ExportSkeleton( KFbxSkeleton* lSkel, LPCSTR name )
 	lNode->GetDefaultT(lT);
 	lNode->GetDefaultR(lR);
 	lNode->GetDefaultS(lS);
-	KFbxQuaternion q; q.ComposeSphericalXYZ(lR);
-
+	
+	KFbxQuaternion q = ComposeSphericalXYZ(lR);
 	{
 		mmhwriter->StartElement("Translation");
-		mmhwriter->WriteFormatCDATA("%g %g %g %g ", (double)lT[0], (double)lT[1], (double)lT[2], 1.0);
+		mmhwriter->WriteFormatCDATA("%g %g %g %g", (double)lT[0], (double)lT[1], (double)lT[2], 1.0);
 		mmhwriter->EndElement();
 	}
 	{
 		mmhwriter->StartElement("Rotation");
-		mmhwriter->WriteFormatCDATA("%g %g %g %g ", (double)q[0], (double)q[1], (double)q[2], (double)q[3]);
+		mmhwriter->WriteFormatCDATA("%g %g %g %g", (double)q[0], (double)q[1], (double)q[2], (double)q[3]);
 		mmhwriter->EndElement();
 	}
 
@@ -395,17 +480,45 @@ bool MMHExportImpl::GetDiffuseMaterialAndTextureName(KFbxLayerContainer* lLayerC
 	return false;
 }
 
-template <class T>
-inline fbxVectorTemplate3<T> CalcDim(const fbxVectorTemplate3<T>& arg1, const fbxVectorTemplate3<T>& arg2)
+
+struct SkinWeight {
+	int index;
+	float weight;
+};
+
+namespace std {
+template<>
+struct less<SkinWeight> : public binary_function<SkinWeight, SkinWeight, bool>
 {
-	return fbxVectorTemplate3<T>((T)abs(arg2[0]-arg1[0]), (T)abs(arg2[1]-arg1[1]), (T)abs(arg2[2]-arg1[2]) );
+	bool operator()(const SkinWeight& lhs, const SkinWeight& rhs) {
+		if (lhs.weight == 0.0) {
+			if (rhs.weight == 0.0) {
+				return rhs.index < lhs.index;
+			} else {
+				return true;
+			}
+			return false;
+		} else if ( rhs.weight == lhs.weight ) {
+			return lhs.index < rhs.index;
+		} else {
+			return rhs.weight < lhs.weight;
+		}
+	}
+};
+struct equalsSkinWeightIndex : binary_function<SkinWeight, int, bool>
+{
+	bool operator()(SkinWeight& lhs, int rhs) const { return lhs.index == rhs; }
+	bool operator()(int lhs, const SkinWeight& rhs) const { return lhs == rhs.index; }
+	bool operator()(int lhs, int rhs) const { return lhs == rhs; }
+};
+struct equalsInt : binary_function<int, int, bool>
+{
+	bool operator()(int lhs, int rhs) const { return lhs == rhs; }
+};
 }
 
-template <class T>
-inline fbxVectorTemplate3<T> CalcMid(const fbxVectorTemplate3<T>& arg1, const fbxVectorTemplate3<T>& arg2)
-{
-	return fbxVectorTemplate3<T>((T)((arg2[0]+arg1[0])/(T)2), (T)((arg2[1]+arg1[1])/(T)2), (T)((arg2[2]+arg1[2])/(T)2) );
-}
+typedef vector<SkinWeight> SkinWeightList;
+typedef vector<SkinWeightList> BoneWeightList;
 
 void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 {
@@ -422,32 +535,82 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 	lNode->GetDefaultT(lT);
 	lNode->GetDefaultR(lR);
 	lNode->GetDefaultS(lS);
-	KFbxQuaternion q; q.ComposeSphericalXYZ(lR);
-	{
-		mmhwriter->StartElement("CollisionObject");
-		mmhwriter->WriteAttribute( "Kinematic", "true");
-		{
-			mmhwriter->StartElement("Shape");
-			mmhwriter->WriteFormatAttribute( "Name", "Box_%s", name );
-			mmhwriter->WriteAttribute("Type", "Box");
-			mmhwriter->WriteAttribute("AllowEmitterSpawn", "1");
-			mmhwriter->WriteAttribute("Fadeable", "false");
-			mmhwriter->WriteFormatAttribute("DimY", "%g", bdim[1]);
-			mmhwriter->WriteFormatAttribute("DimZ", "%g", bdim[2]);
-			mmhwriter->WriteFormatAttribute("DimX", "%g", bdim[0]);
-			mmhwriter->WriteAttribute("GROUP_MASK_PLACEABLES", "true");
-			mmhwriter->WriteAttribute("GROUP_MASK_WALKABLE", "false");
-			mmhwriter->WriteAttribute("GROUP_MASK_NONWALKABLE", "true");
-			mmhwriter->WriteFormatAttribute("Rotation", "%g %g %g %g", (double)q[0], (double)q[1], (double)q[2], (double)q[3]);
-			mmhwriter->WriteFormatAttribute("Position", "%g %g %g %g", (double)bmid[0], (double)bmid[1], (double)bmid[2], 1.0);
-			mmhwriter->EndElement();
+	KFbxQuaternion q = ComposeSphericalXYZ(lR);
+
+	// Calculate 
+	Text istr, wstr, busedStr;
+
+	int lVertexCount = pMesh->GetControlPointsCount();
+	int lSkinCount = pMesh->GetDeformerCount(KFbxDeformer::eSKIN);
+	if (lSkinCount > 0)
+	{	
+		vector<int> bonesUsed;
+		if ( KFbxSkin* pSkin = (KFbxSkin *)pMesh->GetDeformer(0, KFbxDeformer::eSKIN) ) {
+			int lClusterCount = pSkin->GetClusterCount();
+			BoneWeightList weights;
+			weights.resize( lVertexCount );
+
+			for (int j = 0; j != lClusterCount; ++j) 
+			{
+				KFbxCluster* lCluster = pSkin->GetCluster(j);
+				KFbxNode* pBone = lCluster->GetLink();
+				int iBoneIndex = 0;
+				Node2IndexMap::iterator itr = node2Index.find(pBone);
+				if (itr != node2Index.end())
+				{
+					iBoneIndex = (*itr).second;
+					if (iBoneIndex < 0)
+						iBoneIndex = ~iBoneIndex;
+				}
+				int iUsedBone = 0;
+				vector<int>::iterator vitr = std::find_if(bonesUsed.begin(), bonesUsed.end(), std::bind2nd(equalsInt(), iBoneIndex));
+				if ( bonesUsed.end() == vitr )
+				{
+					iUsedBone = bonesUsed.size();
+					bonesUsed.push_back(iBoneIndex);
+					busedStr.AppendFormat("%d ", iBoneIndex);
+				}
+				else
+				{
+					iUsedBone = (*vitr);
+				}
+				int lIndexCount = lCluster->GetControlPointIndicesCount();
+				int* lIndices = lCluster->GetControlPointIndices();
+				double* lWeights = lCluster->GetControlPointWeights();
+				for (int i = 0; i < lIndexCount; ++i )
+				{
+					SkinWeight sw;
+					int idx = lIndices[i];
+					sw.index = iUsedBone;
+					sw.weight = lWeights[i];
+					SkinWeightList& bw = weights[idx];
+					if ( bw.end() == std::find_if(bw.begin(), bw.end(), std::bind2nd(equalsSkinWeightIndex(), iUsedBone)) )
+						bw.push_back(sw);					
+				}
+
+			}
+			for (int i = 0; i != lVertexCount; ++i) {
+				SkinWeightList& bw = weights[i];
+				std::sort(bw.begin(), bw.end(), less<SkinWeight>());
+				int k, n = min(4, bw.size());
+				for (k=0; k<n; ++k) {
+					istr.AppendFormat("%d ", bw[k].index);
+					wstr.AppendFormat("%g ", bw[k].weight);
+				}
+				for ( ; k<4; ++k) istr.AppendFormat("0 "), wstr.AppendFormat("0 ");
+				istr.append("\n"), wstr.append("\n");
+			}
 		}
-		mmhwriter->EndElement();
+		// Empty whitespace at the end can cause Graphicsprocessormmh to crash
+		istr.Trim(), wstr.Trim(), busedStr.Trim();
 	}
+
 	{
 		mmhwriter->StartElement("NodeMesh");
 		mmhwriter->WriteAttribute( "Name", name);
-		mmhwriter->WriteAttribute( "ID", "_f"); //????
+		if (!busedStr.isNull())
+			mmhwriter->WriteAttribute( "BonesUsed", busedStr);
+		mmhwriter->WriteAttribute( "ID", GetNextId()); //????
 		mmhwriter->WriteAttribute( "MeshGroupName", name);
 		Text matName, texName;
 		if (GetDiffuseMaterialAndTextureName(pMesh, matName, texName))
@@ -455,10 +618,10 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 			mmhwriter->WriteAttribute( "MaterialObject", matName);
 			ExportMaterialObject(pMesh, matName, texName);
 		}
-		mmhwriter->WriteAttribute( "CastRuntimeShadow", "1");
-		mmhwriter->WriteAttribute( "ReceiveRuntimeShadow", "1");
-		mmhwriter->WriteAttribute( "CastBakedShadow", "1");
-		mmhwriter->WriteAttribute( "ReceiveBakedShadow", "1");
+		//mmhwriter->WriteAttribute( "CastRuntimeShadow", "1");
+		//mmhwriter->WriteAttribute( "ReceiveRuntimeShadow", "1");
+		//mmhwriter->WriteAttribute( "CastBakedShadow", "1");
+		//mmhwriter->WriteAttribute( "ReceiveBakedShadow", "1");
 		mmhwriter->WriteAttribute( "CutAway", "0");
 		mmhwriter->WriteAttribute( "PunchThrough", "0");
 		{
@@ -469,12 +632,16 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 		}
 		{
 			mmhwriter->StartElement("Translation");
-			mmhwriter->WriteCDATA( FormatText("%g %g %g %g", (double)lT[0], (double)lT[1], (double)lT[2], (double)lT[3]) );
+			Text value = FormatText("%g %g %g %g", (double)lT[0], (double)lT[1], (double)lT[2], (double)lT[3]);
+			value.Trim();
+			mmhwriter->WriteCDATA( value );
 			mmhwriter->EndElement();
 		}
 		{
 			mmhwriter->StartElement("Rotation");
-			mmhwriter->WriteCDATA( FormatText("%g %g %g %g", (double)q[0], (double)q[1], (double)q[2], (double)q[3]) );
+			Text value = FormatText("%g %g %g %g", (double)q[0], (double)q[1], (double)q[2], (double)q[3]);
+			value.Trim();
+			mmhwriter->WriteCDATA( value );
 			mmhwriter->EndElement();
 		}
 		mmhwriter->EndElement();
@@ -487,7 +654,6 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 
 	KFbxLayerElement::EMappingMode lMappingMode = KFbxLayerElement::eNONE;
 
-	int lVertexCount = pMesh->GetControlPointsCount();
 	{
 		KFbxVector4* pVerts = pMesh->GetControlPoints();
 
@@ -568,7 +734,22 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 		mshwriter->WriteCDATA(sstr);
 		mshwriter->EndElement(); // Data
 	}
-	
+	if (lSkinCount > 0)
+	{	
+		mshwriter->StartElement("Data");
+		mshwriter->WriteFormatAttribute("ElementCount", "%d", lVertexCount);
+		mshwriter->WriteAttribute("Semantic", "BLENDINDICES");
+		mshwriter->WriteAttribute("Type", "Short4");
+		mshwriter->WriteCDATA(istr);
+		mshwriter->EndElement(); // Data
+
+		mshwriter->StartElement("Data");
+		mshwriter->WriteFormatAttribute("ElementCount", "%d", lVertexCount);
+		mshwriter->WriteAttribute("Semantic", "BLENDWEIGHT");
+		mshwriter->WriteAttribute("Type", "Float4");
+		mshwriter->WriteCDATA(wstr);
+		mshwriter->EndElement(); // Data
+	}
 	{
 		int lPolygonCount = pMesh->GetPolygonCount();
 		int lVertices = 0;
@@ -608,7 +789,8 @@ void MMHExportImpl::ExportMaterialObject( KFbxMesh* pMesh, LPCTSTR matName, LPCT
 	writer->WriteAttribute("Name", matName);
 
 	writer->StartElement("Material");
-	writer->WriteAttribute("Name", "VFX.mat");
+	writer->WriteAttribute("Name", "Prop.mat");
+	writer->EndElement();
 	writer->StartElement("DefaultSemantic");
 	writer->WriteAttribute("Name", "Blend");
 	writer->EndElement();
@@ -626,4 +808,111 @@ void MMHExportImpl::ExportMaterialObject( KFbxMesh* pMesh, LPCTSTR matName, LPCT
 	//writer->Flush();
 	writer.swap( DAOXmlWriterPtr(NULL) );
 	maofile->Close();
+}
+
+void MMHExportImpl::BuildBoneMap(KFbxNode* lNode)
+{
+	AddBoneIndex(lNode, false);
+
+	if ( KFbxNodeAttribute *pAttr = lNode->GetNodeAttribute() )
+	{
+		KFbxNodeAttribute::EAttributeType lAttributeType = pAttr->GetAttributeType();
+		switch (lAttributeType)
+		{
+		case KFbxNodeAttribute::eMESH:
+			if ( KFbxMesh*pMesh = (KFbxMesh*)pAttr )
+			{
+				int lSkinCount = pMesh->GetDeformerCount(KFbxDeformer::eSKIN);
+				for (int lSkinIdx=0; lSkinIdx < lSkinCount; ++lSkinIdx) {
+					if ( KFbxSkin* pSkin = (KFbxSkin *)pMesh->GetDeformer(lSkinIdx, KFbxDeformer::eSKIN) ) {
+						int lClusterCount = pSkin->GetClusterCount();
+						for (int j = 0; j != lClusterCount; ++j) {
+							KFbxCluster* lCluster = pSkin->GetCluster(j);
+							if ( KFbxNode* pBone = lCluster->GetLink() )
+							{
+								AddBoneIndex(pBone, true);
+							}
+						}
+					}
+				}
+			}
+			break;
+		}
+	}
+	for( int i = 0; i < lNode->GetChildCount(); i++)
+	{
+		BuildBoneMap(lNode->GetChild(i));
+	}
+}
+
+int MMHExportImpl::GetFirstFreeBone()
+{
+	int i=1;
+	for ( ; i<index2Node.size(); ++i){
+		KFbxNode* node = index2Node[i];
+		if (node == NULL)
+			return i;
+	}
+	return i;
+}
+
+void MMHExportImpl::AddBoneIndex( KFbxNode* lNode, bool force )
+{
+	LPCTSTR name = lNode->GetName();
+	// Search for DAOBoneIndex custom property
+	int iBoneIndex = ~0;
+	if (!TryGetUserPropInt(lNode, "DAOBoneIndex", iBoneIndex))
+	{
+		if ( !TryGetPropInt(lNode, "DAOBoneIndex", iBoneIndex) )
+		{
+			iBoneIndex = ~0;
+		}
+	}
+	if (iBoneIndex >= 0)
+	{
+		Node2IndexMap::iterator itr = node2Index.find(lNode);
+		if (itr == node2Index.end())
+		{
+			node2Index[lNode] = iBoneIndex;
+			if (iBoneIndex >= index2Node.size())
+				index2Node.resize(iBoneIndex+1, NULL);
+			// relocate a bone which also uses this index
+			KFbxNode* pBone = index2Node[iBoneIndex];
+			if (pBone != NULL && pBone != lNode)
+			{
+				int idx = GetFirstFreeBone();
+				if (idx >= index2Node.size())
+					index2Node.resize(idx+1, NULL);
+				index2Node[idx] = pBone;
+			}
+			index2Node[iBoneIndex] = lNode;
+		}
+	}
+	else if (force)
+	{
+		Node2IndexMap::iterator itr = node2Index.find(lNode);
+		if (itr == node2Index.end())
+		{
+			int idx = GetFirstFreeBone();
+			if (idx >= index2Node.size())
+				index2Node.resize(idx+1, NULL);
+			node2Index[lNode] = iBoneIndex;
+			index2Node[idx] = lNode;
+		}
+	}
+}
+
+Text MMHExportImpl::GetNextId()
+{
+	Text id = currentId;
+	int len = currentId.Length();
+	if (currentId[len-1] == 'z')
+	{
+		currentId.append('a');
+	}
+	else
+	{
+		++currentId[len-1];
+	}
+	return id;
 }

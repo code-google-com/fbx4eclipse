@@ -312,7 +312,7 @@ void MMHImportImpl::ImportNode( KFbxNode * parent, NODERef node)
 		int boneIdx = node->get_boneIndex();
 		if (boneIdx >= 0 && boneIdx < bones.GetCount()) {
 			bones.SetAt(boneIdx, bone);
-			SetUserPropInt(bone, "DAOBoneIndex", boneIdx);
+			SetPropInt(bone, "DAOBoneIndex", boneIdx);
 		}
 
 		if (bone)

@@ -50,8 +50,7 @@ Quick Start:
     > "%ProgramFiles%\Electronic Arts\Dragon Age Origins\tools\ResourceBuild\Processors\MSH\GraphicsProcessorMSH.exe" -platform pc mmdtogff c_berkbeara_0.msh.xml
     
 TODO:
-  - Convert from FBX to DAO compatable (MMH or MMH.XML files)
-  - Support physics models
+  - Support physics models (collision import/export)
   - Clean up existing conversion
   - Way too much to list here really
 

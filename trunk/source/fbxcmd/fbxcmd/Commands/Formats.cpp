@@ -72,8 +72,8 @@ static bool ExecuteCmd(Program &prog)
 	int nbReaders = pRegistry->GetReaderFormatCount();
 	for(int i=0; i < nbReaders ; i++)
 	{
-		const char *ext = pRegistry->GetWriterFormatExtension(i);
-		const char *desc = pRegistry->GetWriterFormatDescription(i);
+		const char *ext = pRegistry->GetReaderFormatExtension(i);
+		const char *desc = pRegistry->GetReaderFormatDescription(i);
 		cout << FormatString("%-8s %s%s", ext, desc, defaultReader==i?" (default)": "") << endl;
 	}
 	std::cout << std::endl;

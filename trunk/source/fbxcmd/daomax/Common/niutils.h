@@ -25,7 +25,8 @@ HISTORY:
 #include <strclass.h>
 #include <color.h>
 
-#include "utility.h"
+#include "text.h"
+//#include "utility.h"
 
 #ifndef _countof
 #define _countof(x) (sizeof(x)/sizeof((x)[0]))
@@ -35,6 +36,17 @@ const unsigned int IntegerInf = 0x7f7fffff;
 const unsigned int IntegerNegInf = 0xff7fffff;
 const float FloatINF = *(float*)&IntegerInf;
 const float FloatNegINF = *(float*)&IntegerNegInf;
+
+
+typedef std::basic_string<TCHAR, std::char_traits<TCHAR>, std::allocator<TCHAR> > _tstring;
+typedef std::vector<_tstring> _tstringlist;
+typedef std::basic_stringstream<TCHAR, std::char_traits<char>, std::allocator<char> > _tstringstream;
+
+//typedef std::map<_tstring, _tstring, ltstr> NameValueCollection;
+typedef std::pair<_tstring, _tstring> KeyValuePair;
+typedef std::vector<_tstring> stringlist;
+typedef std::vector<_tstring> stringvector;
+
 
 #if 0
 using std::string;

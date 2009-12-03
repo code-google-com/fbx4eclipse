@@ -29,4 +29,14 @@ public:
 
 	//////////////////////////////////////////////////////////////////////////
 	ExporterBase(DAOWriter *owner, KFbxScene* scene, KFbxStreamOptions* options, LPCSTR filename);
+
+	//////////////////////////////////////////////////////////////////////////
+	bool TryGetUserProperty(KFbxNode* node, LPCTSTR name, KFbxProperty& value);
+	bool TryGetPropString(KFbxNode* node, LPCTSTR name, KString& value);
+	bool TryGetPropDouble(KFbxNode* node, LPCTSTR name, double& value);
+	bool TryGetPropInt   (KFbxNode* node, LPCTSTR name, int& value);
+	bool TryGetPropBool  (KFbxNode* node, LPCTSTR name, bool& value);
+
+	bool TryGetUserPropString(KFbxNode* node, LPCTSTR name, KString& value );
+	bool TryGetUserPropInt(KFbxNode* node, LPCTSTR name, int& value );
 };
