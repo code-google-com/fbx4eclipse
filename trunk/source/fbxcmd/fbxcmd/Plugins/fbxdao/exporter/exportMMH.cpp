@@ -324,7 +324,6 @@ bool MMHExportImpl::DoExport()
 			lRoot = lRoot->GetChild(0);
 	}
 	KFbxXMatrix gm = lRoot->GetGlobalFromDefaultTake();
-	//KFbxXMatrix wm = lRoot->GetGlobalState();
 	CollapseTransforms( lRoot, gm );
 
 	ExportNode( lRoot, "GOB", true );
@@ -1408,7 +1407,7 @@ void MMHExportImpl::EndExportNode( KFbxNode* lNode )
 	mmhwriter->EndElement(); // Node
 }
 
-inline bool NotEquals(float x, float y, float tol = FLT_EPSILON * 100)
+inline bool NotEquals(float x, float y, float tol = FLT_EPSILON * 1000)
 {
 	return (fabs(x-y) > tol);
 }
