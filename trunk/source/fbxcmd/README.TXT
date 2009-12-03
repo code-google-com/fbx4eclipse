@@ -1,4 +1,4 @@
-             tazpn's DAO Tools 1.4
+             tazpn's DAO Tools 1.5
              =====================
 
     This packages includes an command line application for

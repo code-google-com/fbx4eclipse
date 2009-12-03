@@ -73,8 +73,9 @@ public:
 	void RecomputeMeshVertices( KFbxMesh* pMesh );
 	bool HasSharedVertices( KFbxMesh* pMesh );
 
-	void RescaleMesh( KFbxMesh* pMesh, KFbxXMatrix & lm );
+	void RescaleMesh( KFbxMesh* pMesh, KFbxXMatrix lm );
 	void CollapseTransforms( KFbxNode* lRoot, KFbxXMatrix gm );
+	void SetLocalStateFromDefaultTake( KFbxNode* lRoot, bool pRecursive );
 
 	//////////////////////////////////////////////////////////////////////////
 
@@ -86,6 +87,7 @@ public:
 	bool allowSharedVertices;
 	bool forceByPolygonVertexMapping;
 	bool forceRecalculateTangentSpace;
+	bool collapseTransforms;
 
 	typedef std::map<KFbxNode*, int> Node2IndexMap;
 	typedef std::vector<KFbxNode*> Index2NodeMap;
@@ -203,6 +205,8 @@ MMHExportImpl::MMHExportImpl( DAOWriter *owner, KFbxScene* scene, KFbxStreamOpti
 	allowSharedVertices = mshExportSettings.GetSetting<bool>("AllowSharedVertices", false);
 	forceByPolygonVertexMapping = mshExportSettings.GetSetting<bool>("ForceByPolygonVertexMapping", true);
 	forceRecalculateTangentSpace = mshExportSettings.GetSetting<bool>("ForceRecalculateTangentSpace", false);
+	collapseTransforms = mshExportSettings.GetSetting<bool>("CollapseTransforms", true);
+		
 
 	mmhfname = filename;
 	LPCTSTR ext = PathFindExtension(mmhfname);
@@ -318,13 +322,14 @@ bool MMHExportImpl::DoExport()
 
 	// Skip scene if first and only child is named GOB
 	if (lRoot->GetChildCount() == 1) {
-		//LPCSTR name = lRoot->GetChildName(0);
 		KFbxNode* lNode = lRoot->GetChild(0);
 		if (lNode != NULL && _tcsicmp(lNode->GetName(), "GOB") == 0)
 			lRoot = lRoot->GetChild(0);
 	}
-	KFbxXMatrix gm = lRoot->GetGlobalFromDefaultTake();
-	CollapseTransforms( lRoot, gm );
+	//SetLocalStateFromDefaultTake(lRoot, true);
+
+	//KFbxXMatrix gm = lRoot->GetGlobalFromDefaultTake();
+	//CollapseTransforms( lRoot, gm );
 
 	ExportNode( lRoot, "GOB", true );
 
@@ -1002,7 +1007,6 @@ void MMHExportImpl::ExportMaterialObject( KFbxMesh* pMesh, LPCTSTR matName, LPCT
 
 	writer->EndElement();
 	writer->EndDocument();
-	//writer->Flush();
 	writer.swap( DAOXmlWriterPtr(NULL) );
 	maofile->Close();
 }
@@ -1366,7 +1370,6 @@ void MMHExportImpl::RecomputeMeshVertices( KFbxMesh* pMesh )
 		n = aNorms[i];
 
 	}
-	//pMesh->ComputeVertexNormals();
 	if (NULL == pMesh->GetLayer(0)->GetNormals())
 		pMesh->ComputeVertexNormals();
 	UpdateTangentSpace(pMesh);
@@ -1419,7 +1422,10 @@ void MMHExportImpl::ExportNodeTransform( KFbxNode* lNode, bool global )
 		double scl = 1.0;
 		if (global)
 		{
-			lS = lNode->GetDefaultS(lS);
+			KFbxXMatrix m = lNode->GetGlobalFromDefaultTake();
+			lT = m.GetT();
+			lR = m.GetR();
+			lS = m.GetS();
 			scl = (double)Average(lS);
 			if ( NotEquals(lS[0], lS[1]) || NotEquals(lS[0], lS[2]) ) {
 				KFbxLog::LogWarn("Node '%s' has non-uniform scale.  Transforms will be collapsed into the node.", lNode->GetName() );
@@ -1428,6 +1434,8 @@ void MMHExportImpl::ExportNodeTransform( KFbxNode* lNode, bool global )
 		}
 		else
 		{
+			lT = lNode->GetDefaultT(lT);
+			lR = lNode->GetDefaultT(lR);
 			lS = lNode->GetDefaultS(lS);
 			scl = (double)Average(lS);
 			if ( NotEquals(lS[0], lS[1]) || NotEquals(lS[0], lS[2]) ) {
@@ -1461,12 +1469,21 @@ void MMHExportImpl::ExportNodeTransform( KFbxNode* lNode, bool global )
 	}
 }
 
-
-void MMHExportImpl::RescaleMesh( KFbxMesh* pMesh, KFbxXMatrix & lm )
+void MMHExportImpl::RescaleMesh( KFbxMesh* pMesh, KFbxXMatrix tm )
 {
-	int lVertexCount = pMesh->GetControlPointsCount();
 	KFbxNode* lNode = pMesh->GetNode();
-	KFbxXMatrix m = lNode->GetGlobalFromDefaultTake();
+
+	if ( !collapseTransforms )
+	{
+		KFbxVector4 lS = tm.GetS();
+		if ( NotEquals(lS[0], lS[1]) || NotEquals(lS[0], lS[2]) ) {
+			KFbxLog::LogWarn("Node '%s' has non-uniform scale.  Transforms will be collapsed into the node.", lNode->GetName() );
+		} else {
+			return;
+		}
+	}
+
+	int lVertexCount = pMesh->GetControlPointsCount();
 	KFbxLayer* lLayer = pMesh->GetLayer(0);
 	KFbxLayerElementNormal* pNormLayer = pMesh->GetLayer(0)->GetNormals();
 	if (pNormLayer == NULL) {
@@ -1481,7 +1498,7 @@ void MMHExportImpl::RescaleMesh( KFbxMesh* pMesh, KFbxXMatrix & lm )
 	for (int i=0;i<lVertexCount; ++i) {
 		KFbxXMatrix mv;
 		mv.SetT(pVerts[i]);
-		mv = m * mv;
+		mv = tm * mv;
 		oldVerts.SetAt(i, pVerts[i]);
 		pVerts[i] = mv.GetT();
 	}
@@ -1499,7 +1516,7 @@ void MMHExportImpl::RescaleMesh( KFbxMesh* pMesh, KFbxXMatrix & lm )
 			KFbxVector4 v = oldVerts.GetAt(iVert);
 			KFbxVector4 n = aNorms.GetAt(iCurVert);
 			KFbxXMatrix mn; mn.SetT(v + n);
-			mn = m * mn;
+			mn = tm * mn;
 			KFbxVector4 n2, v2 = pVerts[iVert];
 			n2 = mn.GetT() - v2;
 			n2.Normalize();
@@ -1507,14 +1524,23 @@ void MMHExportImpl::RescaleMesh( KFbxMesh* pMesh, KFbxXMatrix & lm )
 			++iCurVert;
 		}
 	}
+
+	KFbxXMatrix pivotMatrix;
+	lNode->SetDefaultT(pivotMatrix.GetT());
+	lNode->SetDefaultR(pivotMatrix.GetR());
+	lNode->SetDefaultS(pivotMatrix.GetS());
 }
 
-void MMHExportImpl::CollapseTransforms( KFbxNode* lNode, KFbxXMatrix lm )
+void MMHExportImpl::CollapseTransforms( KFbxNode* lNode, KFbxXMatrix m )
 {
-	KFbxXMatrix m = lNode->GetGlobalFromDefaultTake();
 	for( int i = 0; i < lNode->GetChildCount(); i++)
 	{
 		KFbxNode *lChild = lNode->GetChild(i);
+
+		KFbxXMatrix wm = lNode->GetGlobalFromDefaultTake();
+		KFbxXMatrix lm = GetLocalTransformFromDefaultTake(lChild);
+		KFbxXMatrix tm = m * lm;
+
 		LPCTSTR cname = lChild->GetName();
 		if ( KFbxNodeAttribute *pAttr = lChild->GetNodeAttribute() )
 		{
@@ -1530,7 +1556,7 @@ void MMHExportImpl::CollapseTransforms( KFbxNode* lNode, KFbxXMatrix lm )
 						KFbxGeometryConverter lConverter(mManager);
 						lConverter.TriangulateInPlace(lChild);
 					}
-					RescaleMesh((KFbxMesh*)lChild->GetNodeAttribute(), m);
+					RescaleMesh((KFbxMesh*)lChild->GetNodeAttribute(), tm);
 				}
 				break;
 
@@ -1539,7 +1565,7 @@ void MMHExportImpl::CollapseTransforms( KFbxNode* lNode, KFbxXMatrix lm )
 				{
 					KFbxGeometryConverter lConverter(mManager);
 					lConverter.TriangulateInPlace(lChild);
-					RescaleMesh((KFbxMesh*)lChild->GetNodeAttribute(), m);
+					RescaleMesh((KFbxMesh*)lChild->GetNodeAttribute(), tm);
 				}
 				break;
 
@@ -1548,15 +1574,29 @@ void MMHExportImpl::CollapseTransforms( KFbxNode* lNode, KFbxXMatrix lm )
 				{
 					KFbxGeometryConverter lConverter(mManager);
 					lConverter.TriangulateInPlace(lChild);
-					RescaleMesh((KFbxMesh*)lChild->GetNodeAttribute(), m);
+					RescaleMesh((KFbxMesh*)lChild->GetNodeAttribute(), tm);
 				}
 				break;
 			}
 		}
-		CollapseTransforms(lChild, m);
+		CollapseTransforms(lChild, tm);
 	}
 
-	KFbxXMatrix identityMatrix;
-	SetGlobalDefaultPosition(lNode, identityMatrix);
-	lNode->SetDefaultTakeFromLocalState(false);
+	//KFbxXMatrix pivotMatrix;
+	//lNode->SetDefaultT(pivotMatrix.GetT());
+	//lNode->SetDefaultR(pivotMatrix.GetR());
+	//lNode->SetDefaultS(pivotMatrix.GetS());
+}
+
+void MMHExportImpl::SetLocalStateFromDefaultTake( KFbxNode* lNode, bool bRecursive )
+{
+	KFbxXMatrix m = GetLocalTransformFromDefaultTake(lNode);
+	if (bRecursive) {
+		for( int i = 0; i < lNode->GetChildCount(); i++) {
+			SetLocalStateFromDefaultTake( lNode->GetChild(i), bRecursive );
+		}
+	}
+	lNode->SetDefaultT(m.GetT());
+	lNode->SetDefaultR(m.GetR());
+	lNode->SetDefaultS(m.GetS());
 }

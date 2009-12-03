@@ -6,6 +6,7 @@
 #include <io.h>
 #include <algorithm>
 #include <functional>
+#include <sys/stat.h>
 
 //#include <windows.h>
 //#include "../fbxcmn/KFbxLog.h"
@@ -436,6 +437,10 @@ struct ResourceResolver
 				{
 					for (_tstringlist::iterator erfitr = erfFileList.begin(); erfitr != erfFileList.end(); ++erfitr) {
 						_tstring erfFileName(*erfitr);
+
+						struct _stat fstat;
+						if ( -1 == _stat( erfFileName.c_str(), &fstat ) || ( fstat.st_mode & S_IFDIR ) )
+							continue;
 
 						DAOStreamPtr erfstream( DAOStream::Create(erfFileName.c_str(), true));
 

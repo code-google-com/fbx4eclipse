@@ -1,8 +1,17 @@
-             tazpn's DAO Tools 1.4
+             tazpn's DAO Tools 1.5
              =====================
 
 Change log
 ----------
+1.5
+-----
+ - Add option to force calculate tangents and binormals as some files 
+    seem to have bad tagents and binormals 
+ - Rewrite exporter to expand all vertexes in polygon order.  
+    This is to ensure good exports rather than optimized exports.
+ 
+ 
+ 
 1.4
 -----   
  - Calculate Tangents and Binormals when not present already
