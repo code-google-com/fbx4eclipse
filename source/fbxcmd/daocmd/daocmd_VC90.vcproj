@@ -5,6 +5,10 @@
 	Name="daocmd"
 	ProjectGUID="{3976526D-2906-443B-B716-95E3915A7CBE}"
 	RootNamespace="daocmd"
+	SccProjectName="SAK"
+	SccAuxPath="SAK"
+	SccLocalPath="SAK"
+	SccProvider="SAK"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>

@@ -5,6 +5,10 @@
 	Name="ViewScene"
 	ProjectGUID="{8F553E34-1139-42B2-A136-F05E719A6C43}"
 	RootNamespace="ViewScene"
+	SccProjectName="SAK"
+	SccAuxPath="SAK"
+	SccLocalPath="SAK"
+	SccProvider="SAK"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -797,7 +801,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="xcopy /Y /D &quot;$(InputPath)&quot; &quot;$(OutDir)&quot;"
+					CommandLine="xcopy /Y /D &quot;$(InputPath)&quot; &quot;$(OutDir)&quot;&#x0D;&#x0A;"
 					Outputs="$(OutDir)\$(InputFileName)"
 				/>
 			</FileConfiguration>
@@ -806,7 +810,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="xcopy /Y /D &quot;$(InputPath)&quot; &quot;$(OutDir)&quot;"
+					CommandLine="xcopy /Y /D &quot;$(InputPath)&quot; &quot;$(OutDir)&quot;&#x0D;&#x0A;"
 					Outputs="$(OutDir)\$(InputFileName)"
 				/>
 			</FileConfiguration>

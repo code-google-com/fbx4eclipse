@@ -5,6 +5,9 @@
 	Name="fbxdao"
 	ProjectGUID="{974A7449-75BF-4636-AA1D-9967DCC7AE1F}"
 	RootNamespace="fbxdao"
+	SccProjectName="Perforce Project"
+	SccLocalPath="..\..\.."
+	SccProvider="MSSCCI:Perforce SCM"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>

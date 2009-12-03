@@ -5,6 +5,10 @@
 	Name="daolib"
 	ProjectGUID="{DF28B527-D6C5-4505-B451-436856FC6235}"
 	RootNamespace="daolib"
+	SccProjectName="SAK"
+	SccAuxPath="SAK"
+	SccLocalPath="SAK"
+	SccProvider="SAK"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
