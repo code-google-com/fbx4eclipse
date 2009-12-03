@@ -37,6 +37,7 @@ public:
 	template <class T>
 	T GetProp(LPCTSTR name, T defaultValue)
 	{
+		importSettings.
 		//IOSREF.GetBoolProp(name, default);
 		return defaultValue;
 	}

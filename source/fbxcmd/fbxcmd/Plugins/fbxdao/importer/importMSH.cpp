@@ -55,6 +55,13 @@ public:
 
 	void LoadMaterial( KFbxMesh* pMesh, KFbxSurfaceMaterial * lMaterial, DAO::MAO::MaterialObjectRef matObj );
 
+	template <class T>
+	T GetProp(LPCTSTR name, T defaultValue)
+	{
+		return importSettings.GetSetting(name, defaultValue);
+	}
+
+	AppSettings importSettings;
 	DAO::MESH::MESHPtr root;
 	BOOL enableScale;
 	bool flipUV;
@@ -154,7 +161,10 @@ KFbxNode * MSHImportImpl::DoImport(KFbxNode * pNode, DAO::MMH::MSHHRef meshRef, 
 //////////////////////////////////////////////////////////////////////////
 
 MSHImportImpl::MSHImportImpl( DAOReader *owner, KFbxScene* scene, KFbxStreamOptions* options, DAO::GFF::GFFFile &file )
-	: base(owner, scene, options, file), root(NULL)
+	: base(owner, scene, options, file)
+	, root(NULL)
+	, importSettings("MMHImport")
+
 {
 	root.swap( StructPtrCast<DAO::MESH::MESH>( gffFile.get_RootStruct() ) );
 }

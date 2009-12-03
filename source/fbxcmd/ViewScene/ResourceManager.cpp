@@ -380,6 +380,13 @@ struct ResourceResolver
 
 		// search local then search overrides
 		LPCTSTR pszFilePart = PathFindFileName(fileName);
+		if ( 0 == _taccess(pszFilePart, 04) )
+		{
+			TCHAR buffer[MAX_PATH];
+			GetFullPathName(pszFilePart, _countof(buffer), buffer, NULL);
+			return DAOStreamPtr( DAOStream::Create(buffer, true));
+		}
+
 		_tstringlist searchPath = TokenizeString(environmentSettings.GetSetting<_tstring>("OverrideDirs").c_str(), ",;", true);
 		if ( FindFiles(fileName, searchPath, result) )
 		{

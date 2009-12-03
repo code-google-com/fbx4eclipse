@@ -81,7 +81,8 @@
 #include "DrawScene.h"
 #include "Texture.h"
 #include "Common.h"
-
+#include "AppSettings.h"
+#include "ResourceManager.h"
 
 void ExitFunction();
 void CreateMenus();
@@ -104,6 +105,7 @@ KFbxSdkManager* gSdkManager;
 KFbxImporter* gImporter;
 KFbxScene* gScene;
 int gSceneStatus;
+bool bFlipUV;
 
 template<class KString> 
 class DeletionPolicy
@@ -185,6 +187,11 @@ int main(int argc, char** argv)
 
 	gWindowMessage.Reset(new KString());
 	gFileName.Reset(new KString());
+
+	// Get ini settings
+	AppSettings renderSettings("Render");
+	ResourceManager::LoadSettings(renderSettings);
+	bFlipUV = renderSettings.GetSetting("FlipUV", true);
 
 	if(argc <= 1)
     {
@@ -274,9 +281,12 @@ void ImportFunction()
             // the scene in the first timer callback.
             gSceneStatus = MUST_BE_REFRESHED;
 
-            // Convert Axis System to what is used in this example, if needed
-            KFbxAxisSystem SceneAxisSystem = gScene->GetGlobalSettings().GetAxisSystem();
-            KFbxAxisSystem OurAxisSystem(KFbxAxisSystem::YAxis, KFbxAxisSystem::ParityOdd, KFbxAxisSystem::RightHanded);
+			KFbxGlobalSettings& globals = gScene->GetGlobalSettings();
+
+			// Convert Axis System to what is used in this example, if needed
+            KFbxAxisSystem SceneAxisSystem = globals.GetAxisSystem();
+			//KFbxAxisSystem OurAxisSystem(KFbxAxisSystem::ZAxis, KFbxAxisSystem::ParityEven, KFbxAxisSystem::RightHanded);
+			KFbxAxisSystem OurAxisSystem(KFbxAxisSystem::YAxis, KFbxAxisSystem::ParityOdd, KFbxAxisSystem::RightHanded);
             if( SceneAxisSystem != OurAxisSystem )
             {
                 OurAxisSystem.ConvertScene(gScene);

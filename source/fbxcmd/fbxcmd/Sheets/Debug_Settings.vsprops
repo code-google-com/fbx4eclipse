@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioPropertySheet
 	ProjectType="Visual C++"
 	Version="8.00"
@@ -11,8 +11,7 @@
 		MinimalRebuild="true"
 		BasicRuntimeChecks="3"
 		RuntimeLibrary="1"
-    DebugInformationFormat="3"
-    ATLMinimizesCRunTimeLibraryUsage="false"
+		DebugInformationFormat="3"
 	/>
 	<Tool
 		Name="VCLinkerTool"
@@ -20,19 +19,20 @@
 		GenerateDebugInformation="true"
 		ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb"
 	/>
-  <Tool
-    Name="VCMIDLTool"
-    PreprocessorDefinitions="_DEBUG"
-  />
-  <Tool
-    Name="VCResourceCompilerTool"
-    PreprocessorDefinitions="_DEBUG"
-  />
-  <Tool
-    Name="VCPreBuildEventTool"
-    CommandLine="pushd $(SolutionDir)&#x0D;&#x0A;call &quot;$(SolutionDir)makeconfig.bat&quot;&#x0D;&#x0A;popd&#x0D;&#x0A;"
-  />
-
-  <UserMacro Name="NifBuildType" Value="Debug"/>
-  
+	<Tool
+		Name="VCMIDLTool"
+		PreprocessorDefinitions="_DEBUG"
+	/>
+	<Tool
+		Name="VCPreBuildEventTool"
+		CommandLine=""
+	/>
+	<Tool
+		Name="VCResourceCompilerTool"
+		PreprocessorDefinitions="_DEBUG"
+	/>
+	<UserMacro
+		Name="BuildType"
+		Value="Debug"
+	/>
 </VisualStudioPropertySheet>
