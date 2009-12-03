@@ -74,6 +74,7 @@ public:
 	bool HasSharedVertices( KFbxMesh* pMesh );
 
 	void RescaleMesh( KFbxMesh* pMesh, KFbxXMatrix & lm );
+	void CollapseTransforms( KFbxNode* lRoot, KFbxXMatrix gm );
 
 	//////////////////////////////////////////////////////////////////////////
 
@@ -83,6 +84,8 @@ public:
 	Text mshfname, mmhfname;
 	bool flipUV;
 	bool allowSharedVertices;
+	bool forceByPolygonVertexMapping;
+	bool forceRecalculateTangentSpace;
 
 	typedef std::map<KFbxNode*, int> Node2IndexMap;
 	typedef std::vector<KFbxNode*> Index2NodeMap;
@@ -92,11 +95,7 @@ public:
 	Text currentId;
 	int meshId;
 	int nodeId;
-
 	Text GetNextId();
-
-	void CollapseTransforms( KFbxNode* lRoot, KFbxXMatrix gm );
-
 };
 
 template <class T>
@@ -202,6 +201,8 @@ MMHExportImpl::MMHExportImpl( DAOWriter *owner, KFbxScene* scene, KFbxStreamOpti
 	ResourceManager::LoadSettings(mshExportSettings);
 	flipUV = mshExportSettings.GetSetting<bool>("FlipUV", true);
 	allowSharedVertices = mshExportSettings.GetSetting<bool>("AllowSharedVertices", false);
+	forceByPolygonVertexMapping = mshExportSettings.GetSetting<bool>("ForceByPolygonVertexMapping", true);
+	forceRecalculateTangentSpace = mshExportSettings.GetSetting<bool>("ForceRecalculateTangentSpace", false);
 
 	mmhfname = filename;
 	LPCTSTR ext = PathFindExtension(mmhfname);
@@ -738,8 +739,7 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 	mshwriter->WriteAttribute("Name", name);
 	mshwriter->WriteAttribute("Optimize", "All");
 
-	KFbxLayerElement::EMappingMode lMappingMode = KFbxLayerElement::eNONE;
-
+	KFbxLayerElement::EMappingMode lVertMappingMode = forceByPolygonVertexMapping ? KFbxLayerElement::eBY_POLYGON_VERTEX : KFbxLayerElement::eBY_CONTROL_POINT;
 	{
 		KFbxVector4* pVerts = pMesh->GetControlPoints();
 
@@ -748,7 +748,7 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 		mshwriter->WriteAttribute("Semantic", "POSITION");
 		mshwriter->WriteAttribute("Type", "Float4");
 		Text sstr;
-		if (lMappingMode == KFbxLayerElement::eBY_POLYGON_VERTEX)
+		if (lVertMappingMode == KFbxLayerElement::eBY_POLYGON_VERTEX)
 		{
 			int lPolygonCount = pMesh->GetPolygonCount();
 			for ( int lPolygon = 0; lPolygon < lPolygonCount; ++lPolygon )   // for each face
@@ -775,7 +775,7 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 
 	if (KFbxLayerElementUV const* pUVs = pMesh->GetLayer(0)->GetUVs())
 	{
-		lMappingMode = pUVs->GetMappingMode();
+		KFbxLayerElement::EMappingMode lUVMappingMode = pUVs->GetMappingMode();
 
 		KFbxLayerElementArrayTemplate<KFbxVector2>& uvs = pUVs->GetDirectArray();
 		mshwriter->StartElement("Data");
@@ -784,20 +784,33 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 		mshwriter->WriteAttribute("Type", "Float2");
 
 		Text sstr;
-		int lPolygonCount = pMesh->GetPolygonCount();
-		for ( int lPolygon = 0; lPolygon < lPolygonCount; ++lPolygon )   // for each face
+		if (lVertMappingMode == KFbxLayerElement::eBY_POLYGON_VERTEX)
 		{
-			int lPolySize = pMesh->GetPolygonSize(lPolygon);
-			for ( int iPoly=0; iPoly < lPolySize; ++iPoly)
+			int lPolygonCount = pMesh->GetPolygonCount();
+			for ( int lPolygon = 0; lPolygon < lPolygonCount; ++lPolygon )   // for each face
 			{
-				int iUV;
-				//if (lMappingMode == KFbxLayerElement::eBY_POLYGON_VERTEX) {
-				//	iUV = pMesh->GetTextureUVIndex(lPolygon, iPoly);
-				//} else {
-				//	iUV = pMesh->GetPolygonVertex(lPolygon, iPoly);
-				//}
-				iUV = pMesh->GetPolygonVertex(lPolygon, iPoly);
-				KFbxVector2 uvw = uvs[iUV];
+				int lPolySize = pMesh->GetPolygonSize(lPolygon);
+				for ( int iPoly=0; iPoly < lPolySize; ++iPoly)
+				{
+					int iUV;
+					//if (lMappingMode == KFbxLayerElement::eBY_POLYGON_VERTEX) {
+					//	iUV = pMesh->GetTextureUVIndex(lPolygon, iPoly);
+					//} else {
+					//	iUV = pMesh->GetPolygonVertex(lPolygon, iPoly);
+					//}
+					iUV = pMesh->GetPolygonVertex(lPolygon, iPoly);
+					KFbxVector2 uvw = uvs[iUV];
+					if (uvw[0] < 0.0f || uvw[0] > 1.0f) uvw[0] -= floor(uvw[0]);
+					if (uvw[1] < 0.0f || uvw[1] > 1.0f) uvw[1] -= floor(uvw[1]);
+					if (flipUV) uvw[1] = 1.0f-uvw[1];
+					sstr.AppendFormat("%g %g\n", (double)uvw[0], (double)uvw[1]);
+				}
+			}
+		}
+		else
+		{
+			for (int iVertex=0; iVertex < lVertexCount; ++iVertex) {
+				KFbxVector2 uvw = uvs[iVertex];
 				if (uvw[0] < 0.0f || uvw[0] > 1.0f) uvw[0] -= floor(uvw[0]);
 				if (uvw[1] < 0.0f || uvw[1] > 1.0f) uvw[1] -= floor(uvw[1]);
 				if (flipUV) uvw[1] = 1.0f-uvw[1];
@@ -810,7 +823,7 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 	}
 	if (KFbxLayerElementNormal const* pNorms = pMesh->GetLayer(0)->GetNormals())
 	{
-		lMappingMode = pNorms->GetMappingMode();
+		KFbxLayerElement::EMappingMode lNormMappingMode = pNorms->GetMappingMode();
 
 		KFbxLayerElementArrayTemplate<KFbxVector4>& array = pNorms->GetDirectArray();
 		mshwriter->StartElement("Data");
@@ -818,7 +831,7 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 		mshwriter->WriteAttribute("Semantic", "NORMAL");
 		mshwriter->WriteAttribute("Type", "Float4");
 		Text sstr;
-		if (lMappingMode == KFbxLayerElement::eBY_POLYGON_VERTEX)
+		if (lVertMappingMode == KFbxLayerElement::eBY_POLYGON_VERTEX)
 		{
 			int lPolygonCount = pMesh->GetPolygonCount();
 			for ( int lPolygon = 0; lPolygon < lPolygonCount; ++lPolygon )   // for each face
@@ -844,7 +857,7 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 	}
 	if (KFbxLayerElementTangent const* pTangents = pMesh->GetLayer(0)->GetTangents())
 	{
-		lMappingMode = pTangents->GetMappingMode();
+		KFbxLayerElement::EMappingMode lTangentMappingMode = pTangents->GetMappingMode();
 
 		KFbxLayerElementArrayTemplate<KFbxVector4>& array = pTangents->GetDirectArray();
 		mshwriter->StartElement("Data");
@@ -852,7 +865,7 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 		mshwriter->WriteAttribute("Semantic", "TANGENT");
 		mshwriter->WriteAttribute("Type", "Float4");
 		Text sstr;
-		if (lMappingMode == KFbxLayerElement::eBY_POLYGON_VERTEX)
+		if (lVertMappingMode == KFbxLayerElement::eBY_POLYGON_VERTEX)
 		{
 			int lPolygonCount = pMesh->GetPolygonCount();
 			for ( int lPolygon = 0; lPolygon < lPolygonCount; ++lPolygon )   // for each face
@@ -878,14 +891,15 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 	}
 	if (KFbxLayerElementBinormal const* pBinorms = pMesh->GetLayer(0)->GetBinormals())
 	{	
-		lMappingMode = pBinorms->GetMappingMode();
+		KFbxLayerElement::EMappingMode lBinormMappingMode = pBinorms->GetMappingMode();
+
 		KFbxLayerElementArrayTemplate<KFbxVector4>& array = pBinorms->GetDirectArray();
 		mshwriter->StartElement("Data");
 		mshwriter->WriteFormatAttribute("ElementCount", "%d", lVertexCount);
 		mshwriter->WriteAttribute("Semantic", "BINORMAL");
 		mshwriter->WriteAttribute("Type", "Float4");
 		Text sstr;
-		if (lMappingMode == KFbxLayerElement::eBY_POLYGON_VERTEX)
+		if (lVertMappingMode == KFbxLayerElement::eBY_POLYGON_VERTEX)
 		{
 			int lPolygonCount = pMesh->GetPolygonCount();
 			for ( int lPolygon = 0; lPolygon < lPolygonCount; ++lPolygon )   // for each face
@@ -943,7 +957,6 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 			for ( int iPoly=0; iPoly < lPolySize; ++iPoly)
 			{
 				int iVert = pMesh->GetPolygonVertex(lPolygon, iPoly);
-				//sstr.AppendFormat( "%d ", iVert );
 				sstr.AppendFormat( "%d ", iCurVert++ );
 			}
 			sstr.append('\n');
@@ -1121,7 +1134,7 @@ bool MMHExportImpl::NeedTangentSpace(KFbxMesh *pMesh)
 	KFbxLayerElementTangent* pTangentLayer = pMesh->GetLayer(0)->GetTangents();
 	KFbxLayerElementBinormal* pBinormLayer = pMesh->GetLayer(0)->GetBinormals();
 
-	return (pUVs != NULL) && ((pTangentLayer == NULL) || (pBinormLayer == NULL));
+	return forceRecalculateTangentSpace || ((pUVs != NULL) && ((pTangentLayer == NULL) || (pBinormLayer == NULL)));
 }
 
 void MMHExportImpl::UpdateTangentSpace(KFbxMesh *pMesh)
