@@ -74,6 +74,7 @@ public:
 	DAOStreamPtr mmhfile, mshfile;
 	Text mshfname, mmhfname;
 	bool flipUV;
+	bool allowSharedVertices;
 
 	typedef std::map<KFbxNode*, int> Node2IndexMap;
 	typedef std::vector<KFbxNode*> Index2NodeMap;
@@ -85,6 +86,9 @@ public:
 	int nodeId;
 
 	Text GetNextId();
+
+	void RecomputeMeshVertices( KFbxMesh* pMesh );
+
 };
 
 template <class T>
@@ -137,6 +141,7 @@ MMHExportImpl::MMHExportImpl( DAOWriter *owner, KFbxScene* scene, KFbxStreamOpti
 	meshId = nodeId = 1;
 
 	flipUV = GetProp<bool>("FlipUV", true);
+	allowSharedVertices = GetProp<bool>("AllowSharedVertices", false);
 
 	mmhfname = filename;
 	LPCTSTR ext = PathFindExtension(mmhfname);
@@ -620,12 +625,22 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 		sprintf(buffer, "Mesh%02d", meshId++);
 		name = buffer;
 	}
+
+	if (!allowSharedVertices)
+	{
+		pMesh->SplitPoints();
+		pMesh->ComputeVertexNormals();
+		if (NeedTangentSpace(pMesh))
+			UpdateTangentSpace(pMesh);
+		//RecomputeMeshVertices(pMesh);
+	}
+	else
+	{
+		pMesh->ComputeVertexNormals();
+		if (NeedTangentSpace(pMesh))
+			UpdateTangentSpace(pMesh);
+	}
 	
-	pMesh->ComputeVertexNormals();
-
-	if (NeedTangentSpace(pMesh))
-		UpdateTangentSpace(pMesh);
-
 	pMesh->ComputeBBox();
 	fbxDouble3 bmin = pMesh->BBoxMin.Get();
 	fbxDouble3 bmax = pMesh->BBoxMax.Get();
@@ -773,11 +788,23 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 
 	if (KFbxLayerElementUV const* pUVs = pMesh->GetLayer(0)->GetUVs())
 	{
+		lMappingMode = pUVs->GetMappingMode();
+
 		KFbxLayerElementArrayTemplate<KFbxVector2>& uvs = pUVs->GetDirectArray();
 		mshwriter->StartElement("Data");
 		mshwriter->WriteFormatAttribute("ElementCount", "%d", lVertexCount);
 		mshwriter->WriteAttribute("Semantic", "TEXCOORD");
 		mshwriter->WriteAttribute("Type", "Float2");
+
+		//if (lMappingMode == KFbxLayerElement::eBY_POLYGON_VERTEX)
+		//{
+		//	lCurrentUVIndex = pMesh->GetTextureUVIndex(lPolygonIndex, lVerticeIndex);
+		//}
+		//else // KFbxLayerElement::eBY_CONTROL_POINT
+		//{
+		//	lCurrentUVIndex = pMesh->GetPolygonVertex(lPolygonIndex, lVerticeIndex);
+		//}
+
 		Text sstr;
 		for (int iVertex=0; iVertex < lVertexCount; ++iVertex) {
 			KFbxVector2 uvw = uvs[iVertex];
@@ -792,6 +819,8 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 	}
 	if (KFbxLayerElementNormal const* pNorms = pMesh->GetLayer(0)->GetNormals())
 	{
+		lMappingMode = pNorms->GetMappingMode();
+
 		KFbxLayerElementArrayTemplate<KFbxVector4>& array = pNorms->GetDirectArray();
 		mshwriter->StartElement("Data");
 		mshwriter->WriteFormatAttribute("ElementCount", "%d", lVertexCount);
@@ -807,6 +836,8 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 	}
 	if (KFbxLayerElementTangent const* pTangents = pMesh->GetLayer(0)->GetTangents())
 	{
+		lMappingMode = pTangents->GetMappingMode();
+
 		KFbxLayerElementArrayTemplate<KFbxVector4>& array = pTangents->GetDirectArray();
 		mshwriter->StartElement("Data");
 		mshwriter->WriteFormatAttribute("ElementCount", "%d", lVertexCount);
@@ -822,6 +853,7 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 	}
 	if (KFbxLayerElementBinormal const* pBinorms = pMesh->GetLayer(0)->GetBinormals())
 	{	
+		lMappingMode = pBinorms->GetMappingMode();
 		KFbxLayerElementArrayTemplate<KFbxVector4>& array = pBinorms->GetDirectArray();
 		mshwriter->StartElement("Data");
 		mshwriter->WriteFormatAttribute("ElementCount", "%d", lVertexCount);
@@ -1059,20 +1091,21 @@ void MMHExportImpl::UpdateTangentSpace(KFbxMesh *pMesh)
 	if (pTangentLayer == NULL)
 	{
 		pTangentLayer = KFbxLayerElementTangent::Create(pMesh, "Tangents");
-		pTangentLayer->SetMappingMode(KFbxLayerElement::eBY_CONTROL_POINT);
-		pTangentLayer->SetReferenceMode(KFbxLayerElement::eDIRECT);
 		lLayer->SetTangents(pTangentLayer);
 	}
+	pTangentLayer->SetMappingMode(KFbxLayerElement::eBY_CONTROL_POINT);
+	pTangentLayer->SetReferenceMode(KFbxLayerElement::eDIRECT);
+	KFbxLayerElementArrayTemplate<KFbxVector4>& aTangents = pTangentLayer->GetDirectArray();
+	aTangents.Resize(lVertexCount);
+
 	KFbxLayerElementBinormal* pBinormLayer = pMesh->GetLayer(0)->GetBinormals();
 	if (pBinormLayer == NULL)
 	{
 		pBinormLayer = KFbxLayerElementBinormal::Create(pMesh, "Binormals");
-		pBinormLayer->SetMappingMode(KFbxLayerElement::eBY_CONTROL_POINT);
-		pBinormLayer->SetReferenceMode(KFbxLayerElement::eDIRECT);
 		lLayer->SetBinormals(pBinormLayer);
 	}
-	KFbxLayerElementArrayTemplate<KFbxVector4>& aTangents = pTangentLayer->GetDirectArray();
-	aTangents.Resize(lVertexCount);
+	pBinormLayer->SetMappingMode(KFbxLayerElement::eBY_CONTROL_POINT);
+	pBinormLayer->SetReferenceMode(KFbxLayerElement::eDIRECT);
 	KFbxLayerElementArrayTemplate<KFbxVector4>& aBinorms = pBinormLayer->GetDirectArray();
 	aBinorms.Resize(lVertexCount);
 
@@ -1106,6 +1139,10 @@ void MMHExportImpl::UpdateTangentSpace(KFbxMesh *pMesh)
 		int iuv1 = pMesh->GetTextureUVIndex(lPolygon, 1);
 		int iuv2 = pMesh->GetTextureUVIndex(lPolygon, 2);
 
+		KFbxVector2& uv0 = uvs[iuv0];
+		KFbxVector2& uv1 = uvs[iuv0];
+		KFbxVector2& uv2 = uvs[iuv0];
+
 		float delta_U_0 = uvs[iuv0][0] - uvs[iuv1][0];
 		float delta_U_1 = uvs[iuv2][0] - uvs[iuv1][0];
 		float delta_V_0 = uvs[iuv0][1] - uvs[iuv1][1];
@@ -1136,4 +1173,124 @@ void MMHExportImpl::UpdateTangentSpace(KFbxMesh *pMesh)
 		aTangents.SetAt( i, Normalize(aTangents.GetAt(i)) );
 		aBinorms.SetAt( i, Normalize(aBinorms.GetAt(i)) );
 	}
+}
+
+void MMHExportImpl::RecomputeMeshVertices( KFbxMesh* pMesh )
+{
+	int lVertexCount = pMesh->GetControlPointsCount();
+	int newVertexCount = 0;
+	std::vector<int> indexCount;
+	indexCount.resize(lVertexCount);
+
+	bool hasSharedVertices = false;
+	int lPolygonCount = pMesh->GetPolygonCount();
+	// Handle Tangents and Binormals
+	for ( int lPolygon = 0; lPolygon < lPolygonCount; ++lPolygon )   // for each face
+	{
+		int lPolySize = pMesh->GetPolygonSize(lPolygon);
+		for (int i=0; i<lPolySize; ++i)
+		{
+			int idx = pMesh->GetPolygonVertex(lPolygon, 0);
+			int cnt = indexCount[idx];
+			hasSharedVertices |= ( cnt > 0 );
+			indexCount[idx] = cnt + 1;
+			++newVertexCount;
+		}
+	}
+	if (!hasSharedVertices)
+		return;
+
+	KFbxLayerElementArrayTemplate<KFbxVector4> verts(EFbxType::eDOUBLE4);
+	KFbxLayerElementArrayTemplate<KFbxVector4> norms(EFbxType::eDOUBLE4);
+	KFbxLayerElementArrayTemplate<KFbxVector2> uvs(EFbxType::eDOUBLE2);
+	verts.Resize(newVertexCount);
+	norms.Resize(newVertexCount);
+	uvs.Resize(newVertexCount);
+
+	bool hadNormals = false;
+	KFbxLayerElementArrayTemplate<KFbxVector4> oldNormals(EFbxType::eDOUBLE4);
+	if (KFbxLayerElementNormal const* pNorms = pMesh->GetLayer(0)->GetNormals()){
+		oldNormals = pNorms->GetDirectArray();
+		hadNormals = true;
+	}
+	bool hadUVs = false;
+	KFbxLayerElementArrayTemplate<KFbxVector2> oldUVs(EFbxType::eDOUBLE2);
+	if (KFbxLayerElementUV const* pUVs = pMesh->GetLayer(0)->GetUVs()){
+		oldUVs = pUVs->GetDirectArray();
+		hadUVs = true;
+	}
+
+	KFbxVector4* pVerts = pMesh->GetControlPoints();
+	int lVertIdx = 0;
+	for ( int lPolygon = 0; lPolygon < lPolygonCount; ++lPolygon )   // for each face
+	{
+		int lPolySize = pMesh->GetPolygonSize(lPolygon);
+		for (int i=0; i<lPolySize; ++i)
+		{
+			int idx = pMesh->GetPolygonVertex(lPolygon, 0);
+			verts.SetAt(lVertIdx, pVerts[idx]);
+			if (hadNormals)
+				norms.SetAt(lVertIdx, oldNormals[idx]);
+			if (hadUVs)
+				uvs.SetAt(lVertIdx, oldUVs[idx]);
+			++lVertIdx;
+		}
+	}
+	for ( int lPolygon = lPolygonCount-1; lPolygon >= 0; --lPolygon )   // for each face
+		pMesh->RemovePolygon(lPolygon);
+
+	lVertIdx = 0;
+	for ( int lPolygon =0; lPolygon < lPolygonCount; ++lPolygon)
+	{
+		pMesh->BeginPolygon(lPolygon);
+		pMesh->AddPolygon(lVertIdx, lVertIdx); ++lVertIdx;
+		pMesh->AddPolygon(lVertIdx, lVertIdx); ++lVertIdx;
+		pMesh->AddPolygon(lVertIdx, lVertIdx); ++lVertIdx;
+		pMesh->EndPolygon ();
+	}
+
+	pMesh->SetControlPointCount(newVertexCount);
+
+	KFbxLayer* lLayer = pMesh->GetLayer(0);
+	KFbxLayerElementNormal* pNormLayer = pMesh->GetLayer(0)->GetNormals();
+	if (pNormLayer == NULL)
+	{
+		pNormLayer = KFbxLayerElementNormal::Create(pMesh, "");
+		pNormLayer->SetMappingMode(KFbxLayerElement::eBY_CONTROL_POINT);
+		pNormLayer->SetReferenceMode(KFbxLayerElement::eDIRECT);
+		lLayer->SetNormals(pNormLayer);
+	}
+	KFbxLayerElementArrayTemplate<KFbxVector4>& aNorms = pNormLayer->GetDirectArray();
+	aNorms.Resize(newVertexCount);
+
+	KFbxLayerElementUV* lUVLayer = pMesh->GetLayer(0)->GetUVs();
+	if (lUVLayer == NULL)
+	{
+		lUVLayer=KFbxLayerElementUV::Create(pMesh, "UVChannel_1");
+		lUVLayer->SetMappingMode(KFbxLayerElement::eBY_CONTROL_POINT);
+		lUVLayer->SetReferenceMode(KFbxLayerElement::eDIRECT);
+		lLayer->SetUVs(lUVLayer, KFbxLayerElement::eDIFFUSE_TEXTURES);
+	}
+	KFbxLayerElementArrayTemplate<KFbxVector2>& aUVs = lUVLayer->GetDirectArray();
+	aUVs.Resize(newVertexCount);
+
+	pVerts = pMesh->GetControlPoints();
+	for (int i=0;i<newVertexCount; ++i)
+	{
+		KFbxVector2 uv = uvs[i];
+		KFbxVector4 v = verts[i];
+		KFbxVector4 n = norms[i];
+
+		pVerts[i] = verts[i];
+		aUVs.SetAt(i, uvs[i]);
+		aNorms.SetAt(i, norms[i]);
+
+		uv = aUVs[i];
+		v = pVerts[i];
+		n = aNorms[i];
+
+	}
+	//pMesh->ComputeVertexNormals();
+	pMesh->ComputeVertexNormals();
+	UpdateTangentSpace(pMesh);
 }
