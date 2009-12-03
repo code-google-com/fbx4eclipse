@@ -5,6 +5,10 @@
 	Name="daomax"
 	ProjectGUID="{8C203D05-3CBE-4DCD-8D7D-4AE720E71518}"
 	RootNamespace="daomax"
+	SccProjectName="SAK"
+	SccAuxPath="SAK"
+	SccLocalPath="SAK"
+	SccProvider="SAK"
 	TargetFrameworkVersion="0"
 	>
 	<Platforms>

@@ -42,6 +42,38 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{BB04D90D-6459-41C7-A75C-2ACD01853D8A}"
 EndProject
 Global
+	GlobalSection(SourceCodeControl) = preSolution
+		SccNumberOfProjects = 8
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = daolib\\daolib_2008.vcproj
+		SccProjectTopLevelParentUniqueName1 = dao.sln
+		SccLocalPath1 = .
+		SccProjectFilePathRelativizedFromConnection1 = daolib\\
+		SccProjectUniqueName2 = daocmd\\daocmd_VC90.vcproj
+		SccProjectTopLevelParentUniqueName2 = dao.sln
+		SccLocalPath2 = .
+		SccProjectFilePathRelativizedFromConnection2 = daocmd\\
+		SccProjectUniqueName3 = daomax\\daomax_VC90.vcproj
+		SccProjectTopLevelParentUniqueName3 = dao.sln
+		SccLocalPath3 = .
+		SccProjectFilePathRelativizedFromConnection3 = daomax\\
+		SccProjectUniqueName4 = ViewScene\\ViewScene_net2008.vcproj
+		SccProjectTopLevelParentUniqueName4 = dao.sln
+		SccLocalPath4 = .
+		SccProjectFilePathRelativizedFromConnection4 = ViewScene\\
+		SccProjectUniqueName5 = fbxcmd\\fbxcmd_VC90.vcproj
+		SccProjectTopLevelParentUniqueName5 = dao.sln
+		SccLocalPath5 = .
+		SccProjectFilePathRelativizedFromConnection5 = fbxcmd\\
+		SccProjectUniqueName6 = fbxcmd\\Plugins\\fbxcmn\\fbxcmn.vcproj
+		SccProjectTopLevelParentUniqueName6 = dao.sln
+		SccLocalPath6 = .
+		SccProjectFilePathRelativizedFromConnection6 = fbxcmd\\Plugins\\fbxcmn\\
+		SccProjectUniqueName7 = fbxcmd\\Plugins\\fbxdao\\fbxdao_2008.vcproj
+		SccProjectTopLevelParentUniqueName7 = dao.sln
+		SccLocalPath7 = .
+		SccProjectFilePathRelativizedFromConnection7 = fbxcmd\\Plugins\\fbxdao\\
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug - gmax|Win32 = Debug - gmax|Win32
 		Debug - gmax|x64 = Debug - gmax|x64

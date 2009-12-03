@@ -5,6 +5,10 @@
 	Name="fbxcmd"
 	ProjectGUID="{88A6907C-FF50-42A6-B74E-E61C5F8F8E61}"
 	RootNamespace="fbxcmd"
+	SccProjectName="SAK"
+	SccAuxPath="SAK"
+	SccLocalPath="SAK"
+	SccProvider="SAK"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
