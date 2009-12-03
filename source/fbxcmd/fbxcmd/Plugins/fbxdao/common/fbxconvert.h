@@ -172,6 +172,13 @@ static inline KFbxXMatrix GetLocalTransform( KFbxNode * lNode )
 	return KFbxXMatrix ( lNode->GetDefaultT(lT), lNode->GetDefaultR(lR), lNode->GetDefaultS(lS) );
 }
 
+static inline void SetLocalTransform( KFbxNode * lNode, KFbxXMatrix &m )
+{
+	lNode->SetDefaultT(m.GetT());
+	lNode->SetDefaultR(m.GetR());
+	lNode->SetDefaultS(m.GetS());
+}
+
 
 static inline KFbxVector4 CalculateCenter(KFbxGeometryBase* pMesh)
 {

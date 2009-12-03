@@ -23,7 +23,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			ConfigurationType="1"
-			InheritedPropertySheets=".\Sheets\dao_Settings.vsprops;.\Sheets\daolib_Settings.vsprops;..\Sheets\Default_Settings.vsprops"
+			InheritedPropertySheets=".\Sheets\dao_Settings.vsprops;.\Sheets\daolib_Settings.vsprops;..\Sheets\Default_Settings.vsprops;..\Sheets\libxml2.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -105,7 +105,7 @@
 		<Configuration
 			Name="Release|Win32"
 			ConfigurationType="1"
-			InheritedPropertySheets=".\Sheets\dao_Settings.vsprops;.\Sheets\daolib_Settings.vsprops;..\Sheets\Default_Settings.vsprops"
+			InheritedPropertySheets=".\Sheets\dao_Settings.vsprops;.\Sheets\daolib_Settings.vsprops;..\Sheets\Default_Settings.vsprops;..\Sheets\libxml2.vsprops"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -385,6 +385,38 @@
 			</File>
 			<File
 				RelativePath=".\Commands\ERF.cpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Common"
+			>
+			<File
+				RelativePath=".\Common\AppSettings.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Common\AppSettings.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Common\common.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Common\common.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Common\DAXmlWriter.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Common\DAXmlWriter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Common\IniSection.h"
 				>
 			</File>
 		</Filter>
