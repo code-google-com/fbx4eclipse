@@ -6,12 +6,12 @@
 	>
 	<Tool
 		Name="VCCLCompilerTool"
-		AdditionalIncludeDirectories="D:\Development\Projects\Gaming\dao\daolib\common;D:\Development\Projects\Gaming\dao\daolib\model"
+		AdditionalIncludeDirectories="$(SolutionDir)daolib\common;$(SolutionDir)daolib\model"
 		PreprocessorDefinitions=""
 	/>
 	<Tool
 		Name="VCLinkerTool"
 		AdditionalDependencies="daolib.lib"
-		AdditionalLibraryDirectories="&quot;D:\Development\Projects\Gaming\dao\Staging\$(ConfigurationName)&quot;"
+		AdditionalLibraryDirectories="&quot;$(SolutionDir)Staging\$(ConfigurationName)&quot;"
 	/>
 </VisualStudioPropertySheet>
