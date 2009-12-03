@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="gmax_Version_12"
+  InheritedPropertySheets="..\User_Settings.vsprops"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+    PreprocessorDefinitions="GAME_VER"
+  />
+
+  <UserMacro Name="MaxInstallDir" Value="$(GMAXINSTALLPATH12)\" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MaxPluginDir" Value="$(GMAX_APPDATA_PATH12)\plugins\" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MaxPlugcfgDir" Value="$(GMAX_APPDATA_PATH12)\plugcfg\" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MaxSDKDir" Value="$(GMAX_SDK_PATH12)\maxsdk\" PerformEnvironmentSet="true"/>
+  
+</VisualStudioPropertySheet>

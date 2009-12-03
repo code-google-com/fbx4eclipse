@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="Niflib_Settings"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+    AdditionalIncludeDirectories="$(NiflibDir)\include"
+    PreprocessorDefinitions="USE_NIFLIB_TEMPLATE_HELPERS;NIFLIB_STATIC_LINK"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+    AdditionalLibraryDirectories="$(NiflibDir)\lib"
+  />
+	<UserMacro
+		Name="NiflibDir"
+		Value="$(SolutionDir)..\..\niflib"
+	/>
+</VisualStudioPropertySheet>

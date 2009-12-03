@@ -1,0 +1,198 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_WM_TYPE DIALOGEX 0, 0, 107, 127
+STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_VISIBLE
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    CONTROL         "No Type",IDC_RDO_TYPE_NONE,"Button",BS_AUTORADIOBUTTON,8,6,78,12
+    CONTROL         "Character (skin)",IDC_RDO_TYPE_SKIN,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,8,19,78,12
+    CONTROL         "Placeable (rigid)",IDC_RDO_TYPE_RIGD,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,8,32,78,12
+    CONTROL         "Walkmesh",IDC_RDO_TYPE_WALK,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,8,45,78,12
+    CONTROL         "Attachments (hook)",IDC_RDO_TYPE_HOOK,"Button",BS_AUTORADIOBUTTON,8,58,78,11
+    CONTROL         "Collision Type 2",IDC_RDO_TYPE_COL2,"Button",BS_AUTORADIOBUTTON,8,71,78,10
+    CONTROL         "Collision Type 3",IDC_RDO_TYPE_COL3,"Button",BS_AUTORADIOBUTTON,8,82,78,13
+    CONTROL         "Hair Info (dummy)",IDC_RDO_TYPE_HAIR,"Button",BS_AUTORADIOBUTTON,8,95,78,14
+    CONTROL         "Helm Info (dummy)",IDC_RDO_TYPE_HELM,"Button",BS_AUTORADIOBUTTON,8,110,78,10
+END
+
+IDD_WM_HAIR DIALOGEX 0, 0, 107, 60
+STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_VISIBLE
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    CONTROL         "Low",IDC_RDO_HAIR_LOW,"Button",BS_AUTORADIOBUTTON,11,6,72,10
+    CONTROL         "Short",IDC_RDO_HAIR_SHORT,"Button",BS_AUTORADIOBUTTON,11,19,72,10
+    CONTROL         "Ponytail",IDC_RDO_HAIR_PONY,"Button",BS_AUTORADIOBUTTON,11,31,72,10
+    CONTROL         "No Hair",IDC_RDO_HAIR_NONE,"Button",BS_AUTORADIOBUTTON,11,43,72,10
+END
+
+IDD_WM_HELM DIALOGEX 0, 0, 107, 68
+STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_VISIBLE
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    CONTROL         "No Modification",IDC_RDO_HELM_NONE,"Button",BS_AUTORADIOBUTTON,8,4,85,13
+    CONTROL         "Whole (Open Face)",IDC_RDO_HELM_WHOLE,"Button",BS_AUTORADIOBUTTON,8,17,85,11
+    CONTROL         "Partial (Skullcap)",IDC_RDO_HELM_PARTIAL,"Button",BS_AUTORADIOBUTTON,8,30,85,9
+    CONTROL         "Facial (Full)",IDC_RDO_HELM_FULL,"Button",BS_AUTORADIOBUTTON,8,41,85,9
+    CONTROL         "Facial (Full with Beard)",IDC_RDO_HELM_FULL_BEARD,
+                    "Button",BS_AUTORADIOBUTTON,8,53,85,10
+END
+
+IDD_WM_FLAGS DIALOGEX 0, 0, 107, 109
+STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_VISIBLE
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    CONTROL         "No Transparancy",IDC_CHK_FLAGS_NOTRANS,"Button",BS_AUTORADIOBUTTON,10,5,84,12
+    CONTROL         "Transparency Mask",IDC_CHK_FLAGS_TRANS,"Button",BS_AUTORADIOBUTTON,10,18,84,9
+    CONTROL         "Head (cutscene)",IDC_CHK_FLAGS_HEAD,"Button",BS_AUTOCHECKBOX | BS_VCENTER | WS_TABSTOP,10,29,84,9
+    CONTROL         "Glow (nolight)",IDC_CHK_FLAGS_GLOW,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,40,84,9
+    CONTROL         "Environment Map",IDC_CHK_FLAGS_ENVMAP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,53,84,10
+    CONTROL         "Don't Cast Shadows",IDC_CHK_FLAGS_NOSHADOW,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,65,84,9
+    CONTROL         "Force Interface Projected Textures (For Tiles)",IDC_CHK_FLAGS_PROJTEX,
+                    "Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,10,75,78,31
+END
+
+IDD_WM_SKEL DIALOGEX 0, 0, 107, 26
+STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_VISIBLE
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    CONTROL         "Custom1",IDC_TXT_SKEL,"CustEdit",WS_TABSTOP,7,6,92,12
+END
+
+IDD_WM_VERINFO DIALOGEX 0, 0, 107, 69
+STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_VISIBLE
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "Plugin Info:",-1,7,1,94,23
+    GROUPBOX        "Selection:",-1,7,24,94,24
+    LTEXT           "",IDC_LBL_SELECTION,12,36,79,9
+    LTEXT           "",IDC_LBL_VERINFO,12,12,82,8
+    PUSHBUTTON      "Close",IDC_CLOSE,28,53,50,13
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_WM_HELM, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 67
+    END
+
+    IDD_WM_VERINFO, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 26
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BUTTONS             BITMAP                  "buttons.bmp"
+IDB_BUTTON_MASK         BITMAP                  "buttonmask.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_CATEGORY            "NWN2 Utils"
+    IDS_WALKMESH_CLASS_NAME "WalkMeshModifier"
+    IDS_PARAMS              "Parameters"
+    IDS_WM_PAINTTYPE        "Paint Type"
+    IDS_PAINT               "Paint"
+    IDS_MDBUTILITY          "NWN2 MDB Utility"
+    IDS_MDBUTIL_TYPE        "NWN2 Type"
+    IDS_MDBUTIL_FLAG        "NWN2 Flags"
+    IDS_MDBUTIL_SKEL        "NWN2 Skeleton"
+    IDS_MDBUTIL_HAIR        "NWN2 Hair Flags"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MDBUTIL_HELM        "NWN2 Helm Flags"
+    IDS_FLAG_TRANS          "trans"
+    IDS_FLAG_HEAD           "head"
+    IDS_FLAG_GLOW           "glow"
+    IDS_FLAG_ENVMAP         "envmap"
+    IDS_FLAG_NOCAST         "No Cast Shadows"
+    IDS_FLAG_PROJTEX        "Project Textures"
+    IDS_TYPE                "type"
+    IDS_SKEL                "skel"
+    IDS_HAIR                "hair"
+    IDS_HELM                "helm"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

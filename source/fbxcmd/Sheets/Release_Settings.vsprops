@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="Release_Settings"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+    InlineFunctionExpansion="2"
+		Optimization="2"
+		PreprocessorDefinitions="NDEBUG"
+    DebugInformationFormat="3"
+		MinimalRebuild="false"
+    StringPooling="true"
+    RuntimeLibrary="0"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		LinkIncremental="1"
+		GenerateDebugInformation="true"
+		ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb"
+    OptimizeReferences="2"
+    EnableCOMDATFolding="2"
+    SetChecksum="true"
+	/>
+  <Tool
+    Name="VCMIDLTool"
+    PreprocessorDefinitions="NDEBUG"
+  />
+  <Tool
+    Name="VCResourceCompilerTool"
+    PreprocessorDefinitions="NDEBUG"
+  />
+  
+  <UserMacro Name="BuildType" Value="Release"/>
+
+  </VisualStudioPropertySheet>

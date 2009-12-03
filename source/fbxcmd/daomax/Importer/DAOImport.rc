@@ -1,0 +1,155 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_MSH_PANEL DIALOGEX 0, 0, 169, 174
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Import MSH"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "Import:",IDC_STATIC,7,7,155,46
+    CONTROL         "Collision",IDC_CHK_COLLISON,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,18,58,11
+    CONTROL         "Walk meshes",IDC_CHK_WALKMESH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,30,58,11
+    CONTROL         "Bones",IDC_CHK_BONES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,41,58,11
+    CONTROL         "Hair/Helmets",IDC_CHK_HAIR_HELM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,95,18,58,11
+    CONTROL         "Hooks",IDC_CHK_HOOK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,95,30,58,11
+    CONTROL         "Auto Sm&ooth Mesh",IDC_CHK_AUTOSMOOTH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,68,76,11
+    CONTROL         "Flip U&V",IDC_CHK_FLIP_UV,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,80,47,10
+    CONTROL         "&Render Textures in View",IDC_CHK_SHOW_TEX,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,92,91,10
+    CONTROL         "Limit Walk Mesh",IDC_CHK_LIMIT_WALKMESH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,104,68,10
+    CONTROL         "",IDC_ED_WALK_LIMIT,"CustEdit",WS_DISABLED | WS_TABSTOP,106,104,43,10
+    CONTROL         "",IDC_SP_WALK_LIMIT,"SpinnerControl",WS_DISABLED,152,104,7,10
+    GROUPBOX        "Geometry:",IDC_STATIC,7,57,155,93
+    DEFPUSHBUTTON   "&Import",IDOK,48,154,34,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,88,154,33,14
+    CONTROL         "Scaling Factor",IDC_CHK_SCALE_FACTOR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,116,61,10
+    CONTROL         "",IDC_ED_SCALE_FACTOR,"CustEdit",WS_DISABLED | WS_TABSTOP,106,116,43,10
+    CONTROL         "",IDC_SP_SCALE_FACTOR,"SpinnerControl",WS_DISABLED,152,116,7,10
+    CONTROL         "Normal Bump",IDC_CHK_NORMALBUMP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,95,68,64,10
+    CONTROL         "Weld Vertices",IDC_CHK_WELD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,129,60,10
+    CONTROL         "",IDC_ED_WELD_LIMIT,"CustEdit",WS_DISABLED | WS_TABSTOP,106,129,43,10
+    CONTROL         "",IDC_SP_WELD_LIMIT,"SpinnerControl",WS_DISABLED,152,129,7,10
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_MSH_PANEL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 162
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 168
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_LIBDESCRIPTION      "Importer for MSH files"
+    IDS_CATEGORY            "DA:O Utils"
+    IDS_CLASS_NAME          "TZ_DAO_Importer"
+    IDS_PARAMS              "Parameters"
+    IDS_FLIPUV              "Flip UVs"
+    IDS_AUTOSMOOTH          "Auto-Smooth"
+    IDS_RENDERTEX           "Render Textures in View"
+    IDS_AUTOSMOOTHANGLE     "Auto-Smooth Angle"
+    IDS_AUTOSMOOTH_TOOLTIP  "Automatically Smooth Mesh"
+    IDS_TRIM_WALKMESH       "Limit the walkmesh"
+    IDS_WALKMESH_LIMIT      "Maximum value for walkmesh"
+    IDS_ENABLE_COLLISION    "Enable Collision"
+    IDS_ENABLE_HOOKS        "Enable Hooks"
+    IDS_ENABLE_WALKMESH     "Enable Walkmesh"
+    IDS_ENABLE_HAIRHELM     "Enable Hair or Helm"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ENABLE_BONES        "Enable Bones"
+    IDS_BONEMATCH           "Bone Filter Wildcard Matches"
+    IDS_WALKMESH_OPACITY    "Walkmesh Opacity"
+    IDS_FACEBONEMATCH       "Face Bone Filter Wildcard matches"
+    IDS_ENABLE_FACEMODE     "Enable Face Mode Importing"
+    IDS_ENABLE_SCALE        "Enable Scaling"
+    IDS_SCALE_FACTOR        "Scaling Factor"
+    IDS_ENABLE_ANIMATION    "Enable Animation"
+    IDS_NORMALBUMP          "Create Normal Bump slot"
+    IDS_ENABLE_WELD         "Enable Vertex Weld"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="User_Settings"
+	>
+  
+  <UserMacro Name="GMAXINSTALLPATH12" Value="D:\gmax12" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAXINSTALLPATH40" Value="D:\3dsmax4" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAXINSTALLPATH42" Value="D:\3dsmax42" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAXINSTALLPATH50" Value="D:\3dsmax5" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAXINSTALLPATH60" Value="D:\3dsmax6" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAXINSTALLPATH70" Value="D:\3dsmax7" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAXINSTALLPATH80" Value="D:\3dsmax8" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAXINSTALLPATH90" Value="$(ProgramFiles)\AutoDesk\3ds Max 9" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAXINSTALLPATH2008" Value="$(ProgramFiles)\AutoDesk\3ds Max 2008" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAXINSTALLPATH2009" Value="$(ProgramFiles)\AutoDesk\3ds Max 2009" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAXINSTALLPATH2010" Value="$(ProgramFiles)\AutoDesk\3ds Max 2010" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAXINSTALLPATH90_X64" Value="$(ProgramW6432)\AutoDesk\3ds Max 9" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAXINSTALLPATH2008_X64" Value="$(ProgramW6432)\AutoDesk\3ds Max 2008" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAXINSTALLPATH2009_X64" Value="$(ProgramW6432)\AutoDesk\3ds Max 2009" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAXINSTALLPATH2010_X64" Value="$(ProgramW6432)\AutoDesk\3ds Max 2010" PerformEnvironmentSet="true"/>
+   
+  <UserMacro Name="GMAX_SDK_PATH12" Value="D:\gmax12" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_SDK_PATH40" Value="D:\3dsmax4" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_SDK_PATH42" Value="D:\3dsmax42" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_SDK_PATH50" Value="D:\3dsmax5" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_SDK_PATH60" Value="D:\3dsmax6" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_SDK_PATH70" Value="D:\3dsmax7" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_SDK_PATH80" Value="D:\3dsmax8" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_SDK_PATH90" Value="$(ProgramFiles)\AutoDesk\3ds Max 9" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_SDK_PATH2008" Value="$(ProgramFiles)\AutoDesk\3ds Max 2008 SDK" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_SDK_PATH2009" Value="$(ProgramFiles)\AutoDesk\3ds Max 2009 SDK" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_SDK_PATH2010" Value="$(ProgramFiles)\AutoDesk\3ds Max 2010 SDK" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_SDK_PATH90_X64" Value="$(ProgramW6432)\AutoDesk\3ds Max 9" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_SDK_PATH2008_X64" Value="$(ProgramW6432)\AutoDesk\3ds Max 2008 SDK" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_SDK_PATH2009_X64" Value="$(ProgramW6432)\AutoDesk\3ds Max 2009 SDK" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_SDK_PATH2010_X64" Value="$(ProgramW6432)\AutoDesk\3ds Max 2010 SDK" PerformEnvironmentSet="true"/>
+ 
+  <UserMacro Name="GMAX_APPDATA_PATH12" Value="D:\gmax12" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_APPDATA_PATH40" Value="D:\3dsmax4" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_APPDATA_PATH42" Value="D:\3dsmax42" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_APPDATA_PATH50" Value="D:\3dsmax5" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_APPDATA_PATH60" Value="D:\3dsmax6" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_APPDATA_PATH70" Value="D:\3dsmax7" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_APPDATA_PATH80" Value="D:\3dsmax8" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_APPDATA_PATH90" Value="$(LOCALAPPDATA)\Autodesk\3dsMax\9 - 32bit\enu" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_APPDATA_PATH2008" Value="$(LOCALAPPDATA)\Autodesk\3dsMax\2008 - 32bit\enu" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_APPDATA_PATH2009" Value="$(LOCALAPPDATA)\Autodesk\3dsMax\2009 - 32bit\enu" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_APPDATA_PATH2010" Value="$(LOCALAPPDATA)\Autodesk\3dsMax\2010 - 32bit\enu" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_APPDATA_PATH90_X64" Value="$(LOCALAPPDATA)\Autodesk\3dsMax\9 - 64bit\enu" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_APPDATA_PATH2008_X64" Value="$(LOCALAPPDATA)\Autodesk\3dsMax\2008 - 64bit\enu" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_APPDATA_PATH2009_X64" Value="$(LOCALAPPDATA)\Autodesk\3dsMax\2009 - 64bit\enu" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MAX_APPDATA_PATH2010_X64" Value="$(LOCALAPPDATA)\Autodesk\3dsMax\2010 - 64bit\enu" PerformEnvironmentSet="true"/>
+
+  <UserMacro Name="DXSDK_DIR" Value="$(ProgramFiles)\Microsoft DirectX SDK (August 2009)"/>
+ 
+</VisualStudioPropertySheet>

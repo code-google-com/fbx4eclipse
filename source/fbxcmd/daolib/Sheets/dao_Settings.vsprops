@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="DAO_Settings"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		AdditionalIncludeDirectories="$(ProjectDir)..\daolib\common;$(ProjectDir)..\daolib\model"
+		PreprocessorDefinitions="_USE_MATH_DEFINES"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		AdditionalLibraryDirectories=""
+	/>
+</VisualStudioPropertySheet>

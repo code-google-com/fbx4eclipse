@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="Max_Version_5"
+  InheritedPropertySheets="..\User_Settings.vsprops"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+    PreprocessorDefinitions=""
+    DisableSpecificWarnings="4244;4018"
+  />
+  <UserMacro Name="MaxInstallDir" Value="$(MAXINSTALLPATH50)\" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MaxPluginDir" Value="$(MAX_APPDATA_PATH50)\plugins\" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MaxPlugcfgDir" Value="$(MAX_APPDATA_PATH50)\plugcfg\" PerformEnvironmentSet="true"/>
+  <UserMacro Name="MaxSDKDir" Value="$(MAX_SDK_PATH50)\maxsdk\" PerformEnvironmentSet="true"/>
+
+</VisualStudioPropertySheet>
