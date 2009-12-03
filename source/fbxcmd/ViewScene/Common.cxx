@@ -65,30 +65,35 @@ public:
 			SetConsoleTextAttribute( hError, FOREGROUND_RED | FOREGROUND_INTENSITY | (csbi.wAttributes & 0x00F0) );
 			//_ftprintf( stderr, "ERROR:   %s\n", strMessage );
 			fputs(strMessage, stderr); fputs("\n", stderr);
+			OutputDebugString(strMessage);
 			SetConsoleTextAttribute( hError, csbi.wAttributes );
 			break;
 		case LOG_WARN: 
 			SetConsoleTextAttribute( hError, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY | (csbi.wAttributes & 0x00F0) );
 			//_ftprintf( stderr, "WARN:    %s\n", strMessage );
 			fputs(strMessage, stderr); fputs("\n", stderr);
+			OutputDebugString(strMessage);
 			SetConsoleTextAttribute( hError, csbi.wAttributes );
 			break;
 		case LOG_INFO:
 			SetConsoleTextAttribute( hError, csbi.wAttributes | FOREGROUND_INTENSITY);
 			//_ftprintf( stderr, "INFO:    %s\n", strMessage );
 			fputs(strMessage, stderr); fputs("\n", stderr);
+			OutputDebugString(strMessage);
 			SetConsoleTextAttribute( hError, csbi.wAttributes );
 			break;
 		case LOG_DEBUG: 
 			SetConsoleTextAttribute( hError,  (csbi.wAttributes & ~FOREGROUND_INTENSITY) );
 			//_ftprintf( stderr, "DEBUG:   %s\n", strMessage );
 			fputs(strMessage, stderr); fputs("\n", stderr);
+			OutputDebugString(strMessage);
 			SetConsoleTextAttribute( hError, csbi.wAttributes );
 			break;
 		case LOG_VERBOSE: 
 			SetConsoleTextAttribute( hError, FOREGROUND_BLUE | FOREGROUND_GREEN | (csbi.wAttributes & 0x00F0) );
 			//_ftprintf( stderr, "VERBOSE: %s\n", strMessage );
 			fputs(strMessage, stderr); fputs("\n", stderr);
+			OutputDebugString(strMessage);
 			SetConsoleTextAttribute( hError, csbi.wAttributes );
 			break;
 		}

@@ -995,6 +995,7 @@ void MMHExportImpl::UpdateTangentSpace(KFbxMesh *pMesh)
 	if (pUVs == NULL)
 		return;
 
+	KFbxLayerElement::EMappingMode lMappingMode = pMesh->GetLayer(0)->GetUVs()->GetMappingMode();
 	KFbxLayerElementArrayTemplate<KFbxVector2>& uvs = pUVs->GetDirectArray();
 
 	KFbxLayer* lLayer = pMesh->GetLayer(0);
@@ -1022,8 +1023,8 @@ void MMHExportImpl::UpdateTangentSpace(KFbxMesh *pMesh)
 
 	KFbxVector4 emptyVert(0.0, 0.0, 0.0, 0.0);
 	for ( int i = 0; i < lVertexCount; i++ ) {	
-		aBinorms[i] = emptyVert;
-		aTangents[i] = emptyVert;
+		aBinorms.SetAt(i, emptyVert);
+		aTangents.SetAt(i, emptyVert);
 	}
 
 	KFbxVector4* pVerts = pMesh->GetControlPoints();
@@ -1046,9 +1047,19 @@ void MMHExportImpl::UpdateTangentSpace(KFbxMesh *pMesh)
 		KFbxVector4 side_0 = v0 - v1;
 		KFbxVector4 side_1 = v2 - v1;
 
-		int iuv0 = pMesh->GetTextureUVIndex(lPolygon, 0);
-		int iuv1 = pMesh->GetTextureUVIndex(lPolygon, 1);
-		int iuv2 = pMesh->GetTextureUVIndex(lPolygon, 2);
+		int iuv0, iuv1, iuv2;
+		if (lMappingMode == KFbxLayerElement::eBY_POLYGON_VERTEX)
+		{
+			iuv0 = pMesh->GetTextureUVIndex(lPolygon, 0);
+			iuv1 = pMesh->GetTextureUVIndex(lPolygon, 1);
+			iuv2 = pMesh->GetTextureUVIndex(lPolygon, 2);
+		}
+		else // KFbxLayerElement::eBY_CONTROL_POINT
+		{
+			iuv0 = pMesh->GetPolygonVertex(lPolygon, 0);
+			iuv1 = pMesh->GetPolygonVertex(lPolygon, 1);
+			iuv2 = pMesh->GetPolygonVertex(lPolygon, 2);
+		}
 
 		KFbxVector2& uv0 = uvs[iuv0];
 		KFbxVector2& uv1 = uvs[iuv0];
@@ -1247,6 +1258,11 @@ void MMHExportImpl::EndExportNode( KFbxNode* lNode )
 	mmhwriter->EndElement(); // Node
 }
 
+inline bool NotEquals(float x, float y, float tol = FLT_EPSILON * 100)
+{
+	return (fabs(x-y) > tol);
+}
+
 void MMHExportImpl::ExportNodeTransform( KFbxNode* lNode, bool global )
 {
 	{
@@ -1257,7 +1273,7 @@ void MMHExportImpl::ExportNodeTransform( KFbxNode* lNode, bool global )
 			KFbxXMatrix m = lNode->GetGlobalFromDefaultTake();
 			lT = m.GetT(), lR = m.GetR(), lS = m.GetS();
 			scl = (double)Average(lS);
-			if (lS[0] != lS[1] || lS[0] != lS[2]) {
+			if ( NotEquals(lS[0], lS[1]) || NotEquals(lS[0], lS[2]) ) {
 				KFbxLog::LogWarn("Node '%s' has non-uniform scale.  This is not supported at this time.", lNode->GetName() );
 				scl = 1.0;
 			}
@@ -1268,7 +1284,7 @@ void MMHExportImpl::ExportNodeTransform( KFbxNode* lNode, bool global )
 			lR = lNode->GetLocalRFromDefaultTake();
 			lS = lNode->GetLocalSFromDefaultTake();
 			scl = (double)Average(lS);
-			if (lS[0] != lS[1] || lS[0] != lS[2]) {
+			if ( NotEquals(lS[0], lS[1]) || NotEquals(lS[0], lS[2]) ) {
 				KFbxLog::LogWarn("Node '%s' has non-uniform scale.  This is not supported at this time.", lNode->GetName() );
 				scl = 1.0;
 			}
@@ -1376,9 +1392,8 @@ void MMHExportImpl::CollapseTransforms( KFbxNode* lNode, KFbxXMatrix lm )
 	KFbxXMatrix wm = lNode->GetGlobalFromDefaultTake();
 
 	KFbxXMatrix m;
-	//m.SetTRS(lT, lR, lS);
-	//m = lm * m;
-	m = wm;
+	m.SetTRS(lT, lR, lS);
+	m = lm * m;
 
 	for( int i = 0; i < lNode->GetChildCount(); i++)
 	{

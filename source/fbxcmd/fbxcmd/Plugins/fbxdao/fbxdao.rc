@@ -55,8 +55,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,4,2,0
- PRODUCTVERSION 1,4,2,0
+ FILEVERSION 1,4,3,0
+ PRODUCTVERSION 1,4,3,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -72,12 +72,12 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "FileDescription", "Fbx DAO Reader/Writer"
-            VALUE "FileVersion", "1, 4, 2, 0"
+            VALUE "FileVersion", "1, 4, 3, 0"
             VALUE "InternalName", "fbxdao"
             VALUE "LegalCopyright", "Copyright (C) 2009"
             VALUE "OriginalFilename", "fbxdao.dll"
             VALUE "ProductName", "Fbx DAO Reader/Writer"
-            VALUE "ProductVersion", "1, 4, 2, 0"
+            VALUE "ProductVersion", "1, 4, 3, 0"
         END
     END
     BLOCK "VarFileInfo"
