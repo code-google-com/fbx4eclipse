@@ -436,7 +436,7 @@ void GlDrawGrid(KFbxXMatrix& pGlobalPosition)
 
         // X coordinates
         scoord = "X: ";
-        scoord += i;
+        scoord += ((float)i /  100.0f);
         lCount = (int)scoord.GetLen();
 
         glPushMatrix();
@@ -449,9 +449,9 @@ void GlDrawGrid(KFbxXMatrix& pGlobalPosition)
         }
         glPopMatrix();
 
-        // Z coordinates
-        scoord = "Z: ";
-        scoord += i;
+        // Y coordinates
+        scoord = "Y: ";
+        scoord += ((float)i /  100.0f);
         lCount = (int)scoord.GetLen();
 
         glPushMatrix();

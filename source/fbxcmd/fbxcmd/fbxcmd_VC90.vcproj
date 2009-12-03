@@ -98,7 +98,6 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets=".\Sheets\fbx_Settings.vsprops;..\Sheets\Default_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops;.\Sheets\Release_Settings.vsprops"
 			WholeProgramOptimization="1"

@@ -135,7 +135,7 @@ static bool ExecuteCmd(Program &prog)
 			out.Print("\n\n");
 		}
 
-		//gfffile.dump();
+		gfffile.dump();
 
 		//DAOStream in(fullpath, true);
 		//DAO::GFFInfo info;

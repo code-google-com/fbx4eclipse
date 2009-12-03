@@ -285,11 +285,13 @@ void ImportFunction()
 
 			// Convert Axis System to what is used in this example, if needed
             KFbxAxisSystem SceneAxisSystem = globals.GetAxisSystem();
-			//KFbxAxisSystem OurAxisSystem(KFbxAxisSystem::ZAxis, KFbxAxisSystem::ParityEven, KFbxAxisSystem::RightHanded);
-			KFbxAxisSystem OurAxisSystem(KFbxAxisSystem::YAxis, KFbxAxisSystem::ParityOdd, KFbxAxisSystem::RightHanded);
+			//KFbxAxisSystem OurAxisSystem(KFbxAxisSystem::XAxis, KFbxAxisSystem::ParityEven, KFbxAxisSystem::RightHanded);
+			KFbxAxisSystem OurAxisSystem(KFbxAxisSystem::YAxis, KFbxAxisSystem::ParityEven, KFbxAxisSystem::RightHanded);
+			//KFbxAxisSystem OurAxisSystem(KFbxAxisSystem::ZAxis, KFbxAxisSystem::ParityOdd, KFbxAxisSystem::RightHanded);
             if( SceneAxisSystem != OurAxisSystem )
             {
                 OurAxisSystem.ConvertScene(gScene);
+				OurAxisSystem.ConvertScene(gScene);
             }
 
             // Convert Unit System to what is used in this example, if needed
