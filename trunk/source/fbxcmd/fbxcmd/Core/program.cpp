@@ -7,6 +7,8 @@
 #include "fbxutils.h"
 #include "fbxsdk.h" 
 #include "fbx_import.h" 
+#include "../plugins/fbxcmn/KFbxLog.h"
+
 using namespace std;
 
 #pragma comment(lib, "shlwapi.lib")
@@ -269,8 +271,10 @@ bool Cmd::ParseArgs(int argc, char **argv)
 
 // MyMemoryAllocator : a custom memory allocator 
 // to be used by the FBX SDK
+static bool enableFbxMemoryLogging = false;
 class FbxCmdMemoryAllocator : public KFbxMemoryAllocator
 {
+	
 public:
 	FbxCmdMemoryAllocator() 
 		: KFbxMemoryAllocator(MyMalloc, MyCalloc, MyRealloc, MyFree, MyMsize)
@@ -285,7 +289,8 @@ public:
 	{
 		//_heapchk();
 		void *pv = malloc(pSize);
-		//OutputDebugString( FormatText("malloc  0x%08x - 0x%08x (%d)\n", pv, (char*)pv + pSize, pSize) );
+		if (enableFbxMemoryLogging)
+			KFbxLog::LogVerbose("malloc  0x%08x - 0x%08x (%d)", pv, (char*)pv + pSize, pSize);
 		return pv;
 	}
 
@@ -293,7 +298,8 @@ public:
 	{
 		//_heapchk();
 		void *pv = calloc(pCount, pSize);
-		//OutputDebugString( FormatText("calloc  0x%08x - 0x%08x (%d)\n", pv, (char*)pv + pCount * pSize, pCount * pSize) );
+		if (enableFbxMemoryLogging)
+			KFbxLog::LogVerbose("calloc  0x%08x - 0x%08x (%d)", pv, (char*)pv + pCount * pSize, pCount * pSize);
 		return pv;
 	}
 
@@ -301,14 +307,16 @@ public:
 	{
 		//_heapchk();
 		void *pv = realloc(pData, pSize);
-		//OutputDebugString( FormatText("realloc 0x%08x - 0x%08x [0x%08x] (%d)\n", pv, (char*)pv + pSize, pData, pSize) );
+		if (enableFbxMemoryLogging)
+			KFbxLog::LogVerbose("realloc 0x%08x - 0x%08x [0x%08x] (%d)", pv, (char*)pv + pSize, pData, pSize);
 		return pv;
 	}
 
 	static void  MyFree(void* pData)
 	{
 		//_heapchk();
-		//OutputDebugString( FormatText("free    0x%08x\n", pData) );
+		if (enableFbxMemoryLogging)
+			KFbxLog::LogVerbose("free    0x%08x", pData);
 		free(pData);
 		//_heapchk();
 	}
@@ -317,7 +325,8 @@ public:
 	{
 		//_heapchk();
 		size_t sz = _msize(pData);
-		//OutputDebugString( FormatText("msize   0x%08x = %d\n", pData, sz) );
+		if (enableFbxMemoryLogging)
+			KFbxLog::LogVerbose("msize   0x%08x = %d", pData, sz);
 		return sz;
 	}
 };
@@ -495,6 +504,9 @@ void SetWorkingDirectory()
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+	//int tmp = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) & 0x0000FFFF;
+	//_CrtSetDbgFlag( tmp | _CRTDBG_DELAY_FREE_MEM_DF|_CRTDBG_LEAK_CHECK_DF|_CRTDBG_CHECK_EVERY_128_DF);
+
 	//SetWorkingDirectory();
 	return (Cmd::ParseArgs(argc-1, &argv[1]) ? 0 : 1);
 }
