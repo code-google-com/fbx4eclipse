@@ -7,6 +7,8 @@ Change log
 -----   
  - Avoid crash when texture not found in model viewer
  - Initial support for .MMH.XML and .MSH.XML files.
+ - Workaround Euler to Quat conversion bug in FBX library
+ - Initial support for Skin
 
 1.2
 -----   

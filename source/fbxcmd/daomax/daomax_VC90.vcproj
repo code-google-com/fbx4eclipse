@@ -21,7 +21,7 @@
 		<Configuration
 			Name="Release - Max 6|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_6.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_6.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -81,6 +81,7 @@
 		<Configuration
 			Name="Release - Max 6|x64"
 			ConfigurationType="1"
+			InheritedPropertySheets="..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -137,7 +138,7 @@
 		<Configuration
 			Name="Debug - Max 6|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_6.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_6.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -197,6 +198,7 @@
 		<Configuration
 			Name="Debug - Max 6|x64"
 			ConfigurationType="1"
+			InheritedPropertySheets="..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -253,7 +255,7 @@
 		<Configuration
 			Name="Release - Max 7|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_7.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_7.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -313,6 +315,7 @@
 		<Configuration
 			Name="Release - Max 7|x64"
 			ConfigurationType="1"
+			InheritedPropertySheets="..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -369,7 +372,7 @@
 		<Configuration
 			Name="Debug - Max 7|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_7.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_7.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -429,6 +432,7 @@
 		<Configuration
 			Name="Debug - Max 7|x64"
 			ConfigurationType="1"
+			InheritedPropertySheets="..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -485,7 +489,7 @@
 		<Configuration
 			Name="Release - Max 8|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_8.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_8.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -545,6 +549,7 @@
 		<Configuration
 			Name="Release - Max 8|x64"
 			ConfigurationType="1"
+			InheritedPropertySheets="..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -601,7 +606,7 @@
 		<Configuration
 			Name="Debug - Max 8|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_8.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_8.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -661,6 +666,7 @@
 		<Configuration
 			Name="Debug - Max 8|x64"
 			ConfigurationType="1"
+			InheritedPropertySheets="..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -717,7 +723,7 @@
 		<Configuration
 			Name="Debug - Max 5|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_5.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_5.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -777,6 +783,7 @@
 		<Configuration
 			Name="Debug - Max 5|x64"
 			ConfigurationType="1"
+			InheritedPropertySheets="..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -833,7 +840,7 @@
 		<Configuration
 			Name="Release - Max 5|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_5.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_5.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -893,6 +900,7 @@
 		<Configuration
 			Name="Release - Max 5|x64"
 			ConfigurationType="1"
+			InheritedPropertySheets="..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -949,7 +957,7 @@
 		<Configuration
 			Name="Debug - Max 9|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_9.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_9.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -1009,7 +1017,7 @@
 		<Configuration
 			Name="Debug - Max 9|x64"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_9.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_9.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -1066,7 +1074,7 @@
 		<Configuration
 			Name="Release - Max 9|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_9.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_9.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -1126,7 +1134,7 @@
 		<Configuration
 			Name="Release - Max 9|x64"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_9.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_9.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -1183,7 +1191,7 @@
 		<Configuration
 			Name="Release - Max 4|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_4.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_4.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -1243,6 +1251,7 @@
 		<Configuration
 			Name="Release - Max 4|x64"
 			ConfigurationType="1"
+			InheritedPropertySheets="..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -1299,7 +1308,7 @@
 		<Configuration
 			Name="Debug - Max 4|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_4.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_4.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -1359,6 +1368,7 @@
 		<Configuration
 			Name="Debug - Max 4|x64"
 			ConfigurationType="1"
+			InheritedPropertySheets="..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -1415,7 +1425,7 @@
 		<Configuration
 			Name="Debug - gmax|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\gmax_Version_12.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\gmax_Version_12.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -1475,6 +1485,7 @@
 		<Configuration
 			Name="Debug - gmax|x64"
 			ConfigurationType="1"
+			InheritedPropertySheets="..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -1531,7 +1542,7 @@
 		<Configuration
 			Name="Release - gmax|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\gmax_Version_12.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\gmax_Version_12.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -1591,6 +1602,7 @@
 		<Configuration
 			Name="Release - gmax|x64"
 			ConfigurationType="1"
+			InheritedPropertySheets="..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -1647,7 +1659,7 @@
 		<Configuration
 			Name="Debug - Max 4.2|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_42.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_42.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -1707,6 +1719,7 @@
 		<Configuration
 			Name="Debug - Max 4.2|x64"
 			ConfigurationType="1"
+			InheritedPropertySheets="..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -1763,7 +1776,7 @@
 		<Configuration
 			Name="Release - Max 4.2|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_42.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_42.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -1823,6 +1836,7 @@
 		<Configuration
 			Name="Release - Max 4.2|x64"
 			ConfigurationType="1"
+			InheritedPropertySheets="..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -1879,7 +1893,7 @@
 		<Configuration
 			Name="Debug - Max 2008|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2008.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;$(ProjectDir)User_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2008.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;$(ProjectDir)User_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -1939,7 +1953,7 @@
 		<Configuration
 			Name="Debug - Max 2008|x64"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2008.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2008.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -1996,7 +2010,7 @@
 		<Configuration
 			Name="Release - Max 2008|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2008.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2008.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -2057,7 +2071,7 @@
 		<Configuration
 			Name="Release - Max 2008|x64"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2008.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2008.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -2114,7 +2128,7 @@
 		<Configuration
 			Name="Debug - Max 2009|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2009.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;$(ProjectDir)User_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2009.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;$(ProjectDir)User_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -2174,7 +2188,7 @@
 		<Configuration
 			Name="Debug - Max 2009|x64"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2009.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2009.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -2231,7 +2245,7 @@
 		<Configuration
 			Name="Release - Max 2009|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2009.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2009.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -2292,7 +2306,7 @@
 		<Configuration
 			Name="Release - Max 2009|x64"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2009.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2009.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -2349,7 +2363,7 @@
 		<Configuration
 			Name="Debug - Max 2010|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2010.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;$(ProjectDir)User_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2010.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;$(ProjectDir)User_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -2381,6 +2395,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalLibraryDirectories="$(SolutionDir)Staging\$(PlatformName)\$(BuildType)\"
+				DelayLoadDLLs=""
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 			/>
@@ -2409,7 +2424,7 @@
 		<Configuration
 			Name="Debug - Max 2010|x64"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2010.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2010.vsprops;$(ProjectDir)Sheets\Debug_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -2466,7 +2481,7 @@
 		<Configuration
 			Name="Release - Max 2010|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2010.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2010.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -2528,7 +2543,7 @@
 		<Configuration
 			Name="Release - Max 2010|x64"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2010.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;.\Sheets\daolib_Settings.vsprops"
+			InheritedPropertySheets="$(ProjectDir)Sheets\Max_System_$(PlatformName).vsprops;$(ProjectDir)Sheets\Max_Version_2010.vsprops;$(ProjectDir)Sheets\Release_Settings.vsprops;..\Sheets\fbx_Settings.vsprops;..\Sheets\fbxlib_Settings.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -3210,22 +3225,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Exporter\MMHExport.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Exporter\MMHExport.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Exporter\MSHExport.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Exporter\MSHExport.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Exporter\resource.h"
 				>
 			</File>
@@ -3250,19 +3249,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Importer\MMHImport.cpp"
+				RelativePath=".\Importer\FBXImport.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Importer\MMHImport.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Importer\MSHImport.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Importer\MSHImport.h"
+				RelativePath=".\Importer\FBXImport.h"
 				>
 			</File>
 			<File
@@ -3274,7 +3265,27 @@
 			Name="Common"
 			>
 			<File
+				RelativePath=".\Common\AppSettings.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Common\AppSettings.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Common\daostream.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Common\daostream.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Common\daoversion.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Common\fbxinit.cpp"
 				>
 			</File>
 			<File
@@ -3307,6 +3318,26 @@
 			</File>
 			<File
 				RelativePath=".\Common\objectParams.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Common\ResourceManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Common\ResourceManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Common\text.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Common\text.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Common\valueptr.h"
 				>
 			</File>
 		</Filter>

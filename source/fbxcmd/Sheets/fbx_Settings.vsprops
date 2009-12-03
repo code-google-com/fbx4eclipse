@@ -8,7 +8,6 @@
 		Name="VCCLCompilerTool"
 		AdditionalIncludeDirectories="$(FBXSDKDir)include"
 		PreprocessorDefinitions="KFBX_PLUGIN;KFBX_FBXSDK"
-		RuntimeLibrary="3"
 	/>
 	<Tool
 		Name="VCLinkerTool"
@@ -17,11 +16,5 @@
 	<UserMacro
 		Name="FBXSDKDir"
 		Value="D:\Development\Libraries\FbxSdk\2010.2\"
-		
 	/>
-	<!-- 
-	<UserMacro
-		Name="FBXSDKDir"
-		Value="$(ProgramFiles)\Autodesk\FBX\FbxSdk\2010.2\"
-	/> -->
 </VisualStudioPropertySheet>

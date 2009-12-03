@@ -6,7 +6,7 @@
 #define IDC_ENABLE_FACEMODE             1003
 #define IDC_CHK_FACEMODE                1003
 #define IDC_STC_SKELETON                1004
-#define IDD_MSH_PANEL                   10000
+#define IDD_FBX_PANEL                   10000
 #define IDS_LIBDESCRIPTION              10001
 #define IDS_CATEGORY                    10002
 #define IDS_CLASS_NAME                  10003

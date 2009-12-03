@@ -283,6 +283,7 @@ public:
 
 	static void* MyMalloc(size_t pSize)       
 	{
+		//_heapchk();
 		void *pv = malloc(pSize);
 		//OutputDebugString( FormatText("malloc  0x%08x - 0x%08x (%d)\n", pv, (char*)pv + pSize, pSize) );
 		return pv;
@@ -290,6 +291,7 @@ public:
 
 	static void* MyCalloc(size_t pCount,size_t pSize)
 	{
+		//_heapchk();
 		void *pv = calloc(pCount, pSize);
 		//OutputDebugString( FormatText("calloc  0x%08x - 0x%08x (%d)\n", pv, (char*)pv + pCount * pSize, pCount * pSize) );
 		return pv;
@@ -297,6 +299,7 @@ public:
 
 	static void* MyRealloc(void* pData, size_t pSize)
 	{
+		//_heapchk();
 		void *pv = realloc(pData, pSize);
 		//OutputDebugString( FormatText("realloc 0x%08x - 0x%08x [0x%08x] (%d)\n", pv, (char*)pv + pSize, pData, pSize) );
 		return pv;
@@ -304,12 +307,15 @@ public:
 
 	static void  MyFree(void* pData)
 	{
+		//_heapchk();
 		//OutputDebugString( FormatText("free    0x%08x\n", pData) );
 		free(pData);
+		//_heapchk();
 	}
 
 	static size_t MyMsize(void* pData)
 	{
+		//_heapchk();
 		size_t sz = _msize(pData);
 		//OutputDebugString( FormatText("msize   0x%08x = %d\n", pData, sz) );
 		return sz;

@@ -9,8 +9,7 @@
  *>	Copyright (c) 2009, All Rights Reserved.
  **********************************************************************/
 #include "DAOImport.h"
-#include "MSHImport.h"
-#include "MMHImport.h"
+#include "FBXImport.h"
 #include <custcont.h>
 #include <shlwapi.h>
 
@@ -20,9 +19,8 @@ const Interface_ID DAOImport_INTERFACE_ID(0x44934AEE, 0xCFE045E5);
 extern ClassDesc2* GetDAOImportDesc();
 extern ParamMap2UserDlgProc* GetMDImportDlgProc();
 
-static const char *MMHImport = "MMHImport";
-static const char *MSHImport = "MSHImport";
-static const char *MSHCommon = "MSHCommon";
+static const char *FBXImport = "FBXImport";
+static const char *FBXCommon = "FBXCommon";
 
 class DAOImport : public SceneImport {
 	public:
@@ -43,7 +41,7 @@ class DAOImport : public SceneImport {
 		~DAOImport();		
 
       _tstring iniFileName;
-      std::vector<TSTR> Exts;
+      std::vector<_tstring> Exts;
 };
 
 
@@ -57,7 +55,7 @@ class DAOImportClassDesc : public ClassDesc2 {
 	Class_ID		   ClassID() { return DAOImport_CLASS_ID; }
 	const TCHAR* 	Category() { return GetString(IDS_CATEGORY); }
 
-	const TCHAR*	InternalName() { return _T("TZ_MSH_Importer"); }	// returns fixed parsable name (scripter-visible name)
+	const TCHAR*	InternalName() { return _T("TZ_FBX_Importer"); }	// returns fixed parsable name (scripter-visible name)
 	HINSTANCE		HInstance() { return hInstance; }					// returns owning module handle
 };
 
@@ -120,26 +118,26 @@ public:
       switch (id)
       {
       case IMP_PB_SHORTDESC:        v.s = ShortDesc = GetIniValue<TSTR>("System", "ShortDescription", v.s); break;
-      case IMP_PB_FLIPUV:           v.i = GetIniValue<BOOL>(MSHImport, "FlipUVTextures", v.i); break;
-      case IMP_PB_AUTOSMOOTH:       v.i = GetIniValue<BOOL>(MSHImport, "EnableAutoSmooth", v.i); break;
-      case IMP_PB_AUTOSMOOTH_ANGLE: v.f = GetIniValue<float>(MSHImport, "AutoSmoothAngle", v.f); break;
-      case IMP_PB_RENDERTEX:        v.i = GetIniValue<BOOL>(MSHImport, "ShowTextures", v.i); break;
-      case IMP_PB_TRIM_WALKMESH:    v.i = GetIniValue<BOOL>(MSHCommon, "TrimWalkmesh", v.i); break;
-      case IMP_PB_WALKMESH_LIMIT:   v.f = GetIniValue<float>(MSHCommon, "WalkmeshLimit", v.f); break;
-      case IMP_PB_ENABLE_COLLISION: v.i = GetIniValue<BOOL>(MSHImport, "EnableCollision", v.i); break;
-      case IMP_PB_ENABLE_WALKMESH:  v.i = GetIniValue<BOOL>(MSHImport, "EnableWalkmesh", v.i); break;
-      case IMP_PB_ENABLE_HOOKS:     v.i = GetIniValue<BOOL>(MSHImport, "EnableHooks", v.i); break;
-      case IMP_PB_ENABLE_HAIRHELM:  v.i = GetIniValue<BOOL>(MSHImport, "EnableHairOrHelm", v.i); break;
-      case IMP_PB_ENABLE_BONES:     v.i = GetIniValue<BOOL>(MSHImport, "EnableBones", v.i); break;
-      case IMP_PB_BONEMATCH:        v.s = BoneMatch = GetIniValue<TSTR>(MSHImport, "BoneMatch", v.s); break;
-      case IMP_PB_WALK_OPACITY:     v.f = GetIniValue<float>(MSHImport, "WalkmeshOpacity", v.f); break;
-      case IMP_PB_FACEBONEMATCH:    v.s = FaceBoneMatch = GetIniValue<TSTR>(MSHImport, "FaceBoneMatch", v.s); break;
-	  case IMP_PB_ENABLE_SCALE:     v.i = GetIniValue<BOOL>(MSHImport, "EnableScale", v.i); break;
-	  case IMP_PB_SCALE_FACTOR:     v.f = GetIniValue<float>(MSHImport, "ScaleFactor", v.f); break;
-	  case IMP_PB_ENABLE_ANIMATION: v.i = GetIniValue<BOOL>(MMHImport, "EnableAnimation", v.i); break;
-	  case IMP_PB_NORMALBUMP:       v.i = GetIniValue<BOOL>(MSHImport, "NormalBump", v.i); break;
-	  case IMP_PB_ENABLE_WELD:      v.i = GetIniValue<BOOL>(MSHImport, "EnableWeld", v.i); break;
-	  case IMP_PB_WELD_LIMIT:       v.f = GetIniValue<float>(MSHImport, "WeldLimit", v.f); break;
+      case IMP_PB_FLIPUV:           v.i = GetIniValue<BOOL>(FBXImport, "FlipUVTextures", v.i); break;
+      case IMP_PB_AUTOSMOOTH:       v.i = GetIniValue<BOOL>(FBXImport, "EnableAutoSmooth", v.i); break;
+      case IMP_PB_AUTOSMOOTH_ANGLE: v.f = GetIniValue<float>(FBXImport, "AutoSmoothAngle", v.f); break;
+      case IMP_PB_RENDERTEX:        v.i = GetIniValue<BOOL>(FBXImport, "ShowTextures", v.i); break;
+      case IMP_PB_TRIM_WALKMESH:    v.i = GetIniValue<BOOL>(FBXCommon, "TrimWalkmesh", v.i); break;
+      case IMP_PB_WALKMESH_LIMIT:   v.f = GetIniValue<float>(FBXCommon, "WalkmeshLimit", v.f); break;
+      case IMP_PB_ENABLE_COLLISION: v.i = GetIniValue<BOOL>(FBXImport, "EnableCollision", v.i); break;
+      case IMP_PB_ENABLE_WALKMESH:  v.i = GetIniValue<BOOL>(FBXImport, "EnableWalkmesh", v.i); break;
+      case IMP_PB_ENABLE_HOOKS:     v.i = GetIniValue<BOOL>(FBXImport, "EnableHooks", v.i); break;
+      case IMP_PB_ENABLE_HAIRHELM:  v.i = GetIniValue<BOOL>(FBXImport, "EnableHairOrHelm", v.i); break;
+      case IMP_PB_ENABLE_BONES:     v.i = GetIniValue<BOOL>(FBXImport, "EnableBones", v.i); break;
+      case IMP_PB_BONEMATCH:        v.s = BoneMatch = GetIniValue<TSTR>(FBXImport, "BoneMatch", v.s); break;
+      case IMP_PB_WALK_OPACITY:     v.f = GetIniValue<float>(FBXImport, "WalkmeshOpacity", v.f); break;
+      case IMP_PB_FACEBONEMATCH:    v.s = FaceBoneMatch = GetIniValue<TSTR>(FBXImport, "FaceBoneMatch", v.s); break;
+	  case IMP_PB_ENABLE_SCALE:     v.i = GetIniValue<BOOL>(FBXImport, "EnableScale", v.i); break;
+	  case IMP_PB_SCALE_FACTOR:     v.f = GetIniValue<float>(FBXImport, "ScaleFactor", v.f); break;
+	  case IMP_PB_ENABLE_ANIMATION: v.i = GetIniValue<BOOL>(FBXImport, "EnableAnimation", v.i); break;
+	  case IMP_PB_NORMALBUMP:       v.i = GetIniValue<BOOL>(FBXImport, "NormalBump", v.i); break;
+	  case IMP_PB_ENABLE_WELD:      v.i = GetIniValue<BOOL>(FBXImport, "EnableWeld", v.i); break;
+	  case IMP_PB_WELD_LIMIT:       v.f = GetIniValue<float>(FBXImport, "WeldLimit", v.f); break;
       }
    }
 
@@ -149,26 +147,26 @@ public:
       switch (id)
       {
       case IMP_PB_SHORTDESC:        SetIniValue<TCHAR*>("System", "ShortDescription", v.s); break;
-      case IMP_PB_FLIPUV:           SetIniValue<BOOL>(MSHImport, "FlipUVTextures", v.i); break;
-      case IMP_PB_AUTOSMOOTH:       SetIniValue<BOOL>(MSHImport, "EnableAutoSmooth", v.i); break;
-      case IMP_PB_AUTOSMOOTH_ANGLE: SetIniValue<float>(MSHImport, "AutoSmoothAngle", v.f); break;
-      case IMP_PB_RENDERTEX:        SetIniValue<BOOL>(MSHImport, "ShowTextures", v.i); break;
-      case IMP_PB_TRIM_WALKMESH:    SetIniValue<BOOL>(MSHCommon, "TrimWalkmesh", v.i); break;
-      case IMP_PB_WALKMESH_LIMIT:   SetIniValue<float>(MSHCommon, "WalkmeshLimit", v.f); break;
-      case IMP_PB_ENABLE_COLLISION: SetIniValue<BOOL>(MSHImport, "EnableCollision", v.i); break;
-      case IMP_PB_ENABLE_WALKMESH:  SetIniValue<BOOL>(MSHImport, "EnableWalkmesh", v.i); break;
-      case IMP_PB_ENABLE_HOOKS:     SetIniValue<BOOL>(MSHImport, "EnableHooks", v.i); break;
-      case IMP_PB_ENABLE_HAIRHELM:  SetIniValue<BOOL>(MSHImport, "EnableHairOrHelm", v.i); break;
-      case IMP_PB_ENABLE_BONES:     SetIniValue<BOOL>(MSHImport, "EnableBones", v.i); break;
-      case IMP_PB_BONEMATCH:        SetIniValue<TCHAR*>(MSHImport, "BoneMatch", v.s); break;
-      case IMP_PB_WALK_OPACITY:     SetIniValue<float>(MSHImport, "WalkmeshOpacity", v.f); break;
-      case IMP_PB_FACEBONEMATCH:    SetIniValue<TSTR>(MSHImport, "FaceBoneMatch", v.s); break;
-	  case IMP_PB_ENABLE_SCALE:     SetIniValue<BOOL>(MSHImport, "EnableScale", v.i); break;
-	  case IMP_PB_SCALE_FACTOR:     SetIniValue<float>(MSHImport, "ScaleFactor", v.f); break;
-	  case IMP_PB_ENABLE_ANIMATION: SetIniValue<BOOL>(MSHImport, "EnableAnimation", v.i); break;
-	  case IMP_PB_NORMALBUMP:       SetIniValue<BOOL>(MSHImport, "NormalBump", v.i); break;
-	  case IMP_PB_ENABLE_WELD:      SetIniValue<BOOL>(MSHImport, "EnableWeld", v.i); break;
-	  case IMP_PB_WELD_LIMIT:       SetIniValue<float>(MSHImport, "WeldLimit", v.f); break;
+      case IMP_PB_FLIPUV:           SetIniValue<BOOL>(FBXImport, "FlipUVTextures", v.i); break;
+      case IMP_PB_AUTOSMOOTH:       SetIniValue<BOOL>(FBXImport, "EnableAutoSmooth", v.i); break;
+      case IMP_PB_AUTOSMOOTH_ANGLE: SetIniValue<float>(FBXImport, "AutoSmoothAngle", v.f); break;
+      case IMP_PB_RENDERTEX:        SetIniValue<BOOL>(FBXImport, "ShowTextures", v.i); break;
+      case IMP_PB_TRIM_WALKMESH:    SetIniValue<BOOL>(FBXCommon, "TrimWalkmesh", v.i); break;
+      case IMP_PB_WALKMESH_LIMIT:   SetIniValue<float>(FBXCommon, "WalkmeshLimit", v.f); break;
+      case IMP_PB_ENABLE_COLLISION: SetIniValue<BOOL>(FBXImport, "EnableCollision", v.i); break;
+      case IMP_PB_ENABLE_WALKMESH:  SetIniValue<BOOL>(FBXImport, "EnableWalkmesh", v.i); break;
+      case IMP_PB_ENABLE_HOOKS:     SetIniValue<BOOL>(FBXImport, "EnableHooks", v.i); break;
+      case IMP_PB_ENABLE_HAIRHELM:  SetIniValue<BOOL>(FBXImport, "EnableHairOrHelm", v.i); break;
+      case IMP_PB_ENABLE_BONES:     SetIniValue<BOOL>(FBXImport, "EnableBones", v.i); break;
+      case IMP_PB_BONEMATCH:        SetIniValue<TCHAR*>(FBXImport, "BoneMatch", v.s); break;
+      case IMP_PB_WALK_OPACITY:     SetIniValue<float>(FBXImport, "WalkmeshOpacity", v.f); break;
+      case IMP_PB_FACEBONEMATCH:    SetIniValue<TSTR>(FBXImport, "FaceBoneMatch", v.s); break;
+	  case IMP_PB_ENABLE_SCALE:     SetIniValue<BOOL>(FBXImport, "EnableScale", v.i); break;
+	  case IMP_PB_SCALE_FACTOR:     SetIniValue<float>(FBXImport, "ScaleFactor", v.f); break;
+	  case IMP_PB_ENABLE_ANIMATION: SetIniValue<BOOL>(FBXImport, "EnableAnimation", v.i); break;
+	  case IMP_PB_NORMALBUMP:       SetIniValue<BOOL>(FBXImport, "NormalBump", v.i); break;
+	  case IMP_PB_ENABLE_WELD:      SetIniValue<BOOL>(FBXImport, "EnableWeld", v.i); break;
+	  case IMP_PB_WELD_LIMIT:       SetIniValue<float>(FBXImport, "WeldLimit", v.f); break;
       }
    }
 };
@@ -179,22 +177,22 @@ static ParamBlockDesc2 param_blk (
    import_params, _T("parameters"),  0, NULL, P_CLASS_PARAMS | P_AUTO_UI | P_MULTIMAP,
    //rollout
    1,
-   import_params,	IDD_MSH_PANEL,  IDS_PARAMS, 0, 0, NULL, 
+   import_params,	IDD_FBX_PANEL,  IDS_PARAMS, 0, 0, NULL, 
    // params
    IMP_PB_SHORTDESC, _T("shortDescription"),  TYPE_STRING, 0, IDS_LIBDESCRIPTION,
-      p_default,  "DAO MSH Importer",
+      p_default,  "DAO FBX Importer",
       p_accessor,	&INIAccessor,
       end,
 
    IMP_PB_FLIPUV, _T("flipUV"), TYPE_BOOL, 0,	IDS_FLIPUV,
       p_default,  TRUE,
-      p_ui, 		imp_msh_params,    TYPE_CHECKBUTTON,    IDC_CHK_FLIP_UV, 
+      p_ui, 		imp_fbx_params,    TYPE_CHECKBUTTON,    IDC_CHK_FLIP_UV, 
       p_accessor,	&INIAccessor,
       end,
 
    IMP_PB_AUTOSMOOTH, _T("autoSmooth"), TYPE_BOOL, 0,	IDS_AUTOSMOOTH,
       p_default,  TRUE,
-      p_ui, 		imp_msh_params,    TYPE_CHECKBUTTON,    IDC_CHK_AUTOSMOOTH, 
+      p_ui, 		imp_fbx_params,    TYPE_CHECKBUTTON,    IDC_CHK_AUTOSMOOTH, 
       p_accessor,	&INIAccessor,
       p_prompt,   IDS_AUTOSMOOTH_TOOLTIP,
       end,
@@ -206,13 +204,13 @@ static ParamBlockDesc2 param_blk (
 
    IMP_PB_RENDERTEX, _T("renderTextures"), TYPE_BOOL, 0,	IDS_RENDERTEX,
       p_default,  TRUE,
-      p_ui, 		imp_msh_params,    TYPE_CHECKBUTTON,    IDC_CHK_SHOW_TEX, 
+      p_ui, 		imp_fbx_params,    TYPE_CHECKBUTTON,    IDC_CHK_SHOW_TEX, 
       p_accessor,	&INIAccessor,
       end,
 
    IMP_PB_TRIM_WALKMESH, _T("trimWalkmesh"), TYPE_BOOL, 0,	IDS_TRIM_WALKMESH,
       p_default,  TRUE,
-      p_ui, 		imp_msh_params,    TYPE_CHECKBUTTON,    IDC_CHK_LIMIT_WALKMESH, 
+      p_ui, 		imp_fbx_params,    TYPE_CHECKBUTTON,    IDC_CHK_LIMIT_WALKMESH, 
       p_accessor,	&INIAccessor,
       p_enable_ctrls, 2, IDC_ED_WALK_LIMIT, IDC_SP_WALK_LIMIT,
       end,
@@ -226,32 +224,32 @@ static ParamBlockDesc2 param_blk (
 
    IMP_PB_ENABLE_COLLISION, _T("enableCollision"), TYPE_BOOL, 0,	IDS_ENABLE_COLLISION,
       p_default,  TRUE,
-      p_ui, 		imp_msh_params,    TYPE_CHECKBUTTON,    IDC_CHK_COLLISON, 
+      p_ui, 		imp_fbx_params,    TYPE_CHECKBUTTON,    IDC_CHK_COLLISON, 
       p_accessor,	&INIAccessor,
       end,
 
    IMP_PB_ENABLE_WALKMESH, _T("enableWalkmesh"), TYPE_BOOL, 0,	IDS_ENABLE_WALKMESH,
       p_default,  TRUE,
-      p_ui, 		imp_msh_params,    TYPE_CHECKBUTTON,    IDC_CHK_WALKMESH, 
+      p_ui, 		imp_fbx_params,    TYPE_CHECKBUTTON,    IDC_CHK_WALKMESH, 
       p_accessor,	&INIAccessor,
       p_enable_ctrls, 2, IDC_ED_WALK_LIMIT, IDC_SP_WALK_LIMIT,
       end,
 
    IMP_PB_ENABLE_HOOKS, _T("enableHooks"), TYPE_BOOL, 0,	IDS_ENABLE_HOOKS,
       p_default,  TRUE,
-      p_ui, 		imp_msh_params,    TYPE_CHECKBUTTON,    IDC_CHK_HOOK, 
+      p_ui, 		imp_fbx_params,    TYPE_CHECKBUTTON,    IDC_CHK_HOOK, 
       p_accessor,	&INIAccessor,
       end,
 
    IMP_PB_ENABLE_HAIRHELM, _T("enableHairOrHelm"), TYPE_BOOL, 0,	IDS_ENABLE_HAIRHELM,
       p_default,  TRUE,
-      p_ui, 		imp_msh_params,    TYPE_CHECKBUTTON,    IDC_CHK_HAIR_HELM, 
+      p_ui, 		imp_fbx_params,    TYPE_CHECKBUTTON,    IDC_CHK_HAIR_HELM, 
       p_accessor,	&INIAccessor,
       end,
 
    IMP_PB_ENABLE_BONES, _T("enableBones"), TYPE_BOOL, 0,	IDS_ENABLE_BONES,
       p_default,  TRUE,
-      p_ui, 		imp_msh_params,    TYPE_CHECKBUTTON,    IDC_CHK_BONES, 
+      p_ui, 		imp_fbx_params,    TYPE_CHECKBUTTON,    IDC_CHK_BONES, 
       p_accessor,	&INIAccessor,
       end,
 
@@ -273,7 +271,7 @@ static ParamBlockDesc2 param_blk (
 
    IMP_PB_ENABLE_SCALE, _T("enableScale"), TYPE_BOOL, 0,	IDS_ENABLE_SCALE,
 	  p_default,  TRUE,
-	  p_ui, 		imp_msh_params,    TYPE_CHECKBUTTON,    IDC_CHK_SCALE_FACTOR, 
+	  p_ui, 		imp_fbx_params,    TYPE_CHECKBUTTON,    IDC_CHK_SCALE_FACTOR, 
 	  p_accessor,	&INIAccessor,
 	  p_enable_ctrls, 2, IMP_PB_SCALE_FACTOR, IMP_PB_SCALE_FACTOR,
 	  end,
@@ -287,19 +285,19 @@ static ParamBlockDesc2 param_blk (
 
    IMP_PB_ENABLE_ANIMATION, _T("enableAnimation"), TYPE_BOOL, 0,	IDS_ENABLE_ANIMATION,
 	  p_default,  FALSE,
-	  //p_ui, 		imp_msh_params,    TYPE_CHECKBUTTON,    IDC_CHK_ANIMATION, 
+	  //p_ui, 		imp_fbx_params,    TYPE_CHECKBUTTON,    IDC_CHK_ANIMATION, 
 	  p_accessor,	&INIAccessor,
 	  end,
 
    IMP_PB_NORMALBUMP, _T("normalBump"), TYPE_BOOL, 0,	IDS_NORMALBUMP,
 	  p_default,  FALSE,
-	  p_ui, 		imp_msh_params,    TYPE_CHECKBUTTON,    IDC_CHK_NORMALBUMP, 
+	  p_ui, 		imp_fbx_params,    TYPE_CHECKBUTTON,    IDC_CHK_NORMALBUMP, 
 	  p_accessor,	&INIAccessor,
 	  end,
 
    IMP_PB_ENABLE_WELD, _T("enableWeld"), TYPE_BOOL, 0,	IDS_ENABLE_WELD,
 	  p_default,  TRUE,
-	  p_ui, 		imp_msh_params,    TYPE_CHECKBUTTON,    IDC_CHK_WELD, 
+	  p_ui, 		imp_fbx_params,    TYPE_CHECKBUTTON,    IDC_CHK_WELD, 
 	  p_accessor,	&INIAccessor,
 	  p_enable_ctrls, 2, IDC_ED_WELD_LIMIT, IDC_SP_WELD_LIMIT,
 	  end,
@@ -407,11 +405,31 @@ FPInterfaceDesc* DAOImportFunctionPublish::GetDesc()
 
 #endif
 
+
+#pragma region ConsoleLogger
+class ConsoleLogger : public ILogListener
+{
+public:
+	void Message( KFbxLogLevel level, const TCHAR* strMessage )
+	{
+		switch (level)
+		{
+		case LOG_ERROR:   OutputDebugString(FormatText( "ERROR:   %s\n", strMessage ) ); break;
+		case LOG_WARN:    OutputDebugString(FormatText( "WARN:    %s\n", strMessage ) ); break;
+		case LOG_INFO:    OutputDebugString(FormatText( "INFO:    %s\n", strMessage ) ); break;
+		case LOG_DEBUG:   OutputDebugString(FormatText( "DEBUG:   %s\n", strMessage ) ); break;
+		case LOG_VERBOSE: OutputDebugString(FormatText( "VERBOSE: %s\n", strMessage ) ); break;
+		}
+	}
+};
+#pragma endregion
+
+extern "C" int GetFbxReaderFormats(std::vector<_tstring> &exts);
+
 //--- DAOImport -------------------------------------------------------
 DAOImport::DAOImport()
 {
-   Exts.push_back("MSH");
-   Exts.push_back("MMH");
+	GetFbxReaderFormats(Exts);
 }
 
 DAOImport::~DAOImport() 
@@ -428,12 +446,12 @@ const TCHAR *DAOImport::Ext(int n)
 {
    if (n<0 || n >= int(Exts.size()))
       return _T("");	
-   return Exts[n];
+   return Exts[n].c_str();
 }
 
 const TCHAR *DAOImport::LongDesc()
 {
-	return _T("Dragon Age: Origins MSH Importer");
+	return _T("Dragon Age: Origins FBX Importer");
 }
 	
 const TCHAR *DAOImport::ShortDesc() 
@@ -494,71 +512,58 @@ void DAOImport::ShowAbout(HWND hWnd)
 
 int DAOImport::DoImport(const TCHAR *filename,ImpInterface *i, Interface *gi, BOOL suppressPrompts)
 {
-   bool ok = true;
-   try 
-   {
-      HoldSuspend myHold(TRUE);
+	bool ok = true;
+	try 
+	{
+		HoldSuspend myHold(TRUE);
 
-      ReadEnvironment("Environment", INIAccessor.iniFileName, Environment);
-     
-      LPCTSTR ext = PathFindExtension(filename);
-      if (_tcsicmp(ext, ".MSH") == 0)
-      {
-         MSHImporter importer(filename, i, gi, suppressPrompts);
-         if (!importer.isValid())
-            return FALSE;
+		ReadEnvironment("Environment", INIAccessor.iniFileName, Environment);
+
+		LPCTSTR ext = PathFindExtension(filename);
+		FBXImporter importer(filename, i, gi, suppressPrompts);
+		if (!importer.isValid())
+			return FALSE;
 
 #if VERSION_3DSMAX < ((5000<<16)+(15<<8)+0) // Version 4.2 and lower
-         suppressPrompts = TRUE;
+		suppressPrompts = TRUE;
 #endif
 
-         if (!suppressPrompts)
-         {
-            ok = CreateModalParamMap2(
-               0, 
-               param_blk.class_params,
-               0,
-               hInstance,
-               MAKEINTRESOURCE(IDD_MSH_PANEL),
-               GetActiveWindow(),
-               GetMDImportDlgProc()
-               ) ? true : false;
-         }
-         if (ok)
-         {
-            ok = importer.DoImport();
-         }
-      }
-      else if (_tcsicmp(ext, ".MMH") == 0)
-      {
-         MMHImporter importer(filename, i, gi, suppressPrompts);
-         if (!importer.isValid())
-            return FALSE;
-         if (ok)
-         {
-            ok = importer.DoImport();
-         }
-      }
-   }
-   //catch (RuntimeError &e)
-   //{
-   //   //StringStream s; e.sprin1(&s);
-   //   //MessageBox(NULL, s.to_string(), "Import Error", MB_OK);
-   //}
-   catch (std::exception &e)
-   {
-      MessageBox(NULL, e.what(), "Import Error", MB_OK);
-   }
-   catch (...)
-   {
-      MessageBox(NULL, "Unknown error.", "Import Error", MB_OK);
-   }
-   return TRUE;
+		if (!suppressPrompts)
+		{
+			ok = CreateModalParamMap2(
+				0, 
+				param_blk.class_params,
+				0,
+				hInstance,
+				MAKEINTRESOURCE(IDD_FBX_PANEL),
+				GetActiveWindow(),
+				GetMDImportDlgProc()
+				) ? true : false;
+		}
+		if (ok)
+		{
+			ok = importer.DoImport();
+		}
+	}
+	//catch (RuntimeError &e)
+	//{
+	//   //StringStream s; e.sprin1(&s);
+	//   //MessageBox(NULL, s.to_string(), "Import Error", MB_OK);
+	//}
+	catch (std::exception &e)
+	{
+		MessageBox(NULL, e.what(), "Import Error", MB_OK);
+	}
+	catch (...)
+	{
+		MessageBox(NULL, "Unknown error.", "Import Error", MB_OK);
+	}
+	return TRUE;
 }
 
-class MSHImportDlgProc : public ParamMap2UserDlgProc {
+class FBXImportDlgProc : public ParamMap2UserDlgProc {
 public:
-   MSHImportDlgProc() {}
+   FBXImportDlgProc() {}
    INT_PTR DlgProc(TimeValue t,IParamMap2 *map,HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
    void DeleteThis() { }
 
@@ -578,11 +583,11 @@ public:
 };
 extern ParamMap2UserDlgProc* GetMDImportDlgProc()
 {
-   static MSHImportDlgProc theMSHImportDlgProc;
-   return &theMSHImportDlgProc;
+   static FBXImportDlgProc theFBXImportDlgProc;
+   return &theFBXImportDlgProc;
 }
 
-INT_PTR MSHImportDlgProc::DlgProc(TimeValue t,IParamMap2 *map,HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
+INT_PTR FBXImportDlgProc::DlgProc(TimeValue t,IParamMap2 *map,HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
    switch(msg) 
    {
@@ -700,7 +705,7 @@ INT_PTR MSHImportDlgProc::DlgProc(TimeValue t,IParamMap2 *map,HWND hWnd,UINT msg
    return FALSE;
 }
 
-void MSHImportDlgProc::Update(TimeValue t)
+void FBXImportDlgProc::Update(TimeValue t)
 {
    BOOL enabled;
 

@@ -65,6 +65,7 @@
 				ModuleDefinitionFile="fbxcmn.def"
 				GenerateDebugInformation="true"
 				SubSystem="0"
+				ImportLibrary="$(OutDir)\$(ProjectName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"

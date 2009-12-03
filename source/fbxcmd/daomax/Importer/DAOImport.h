@@ -51,14 +51,14 @@
 #include <direct.h>
 #include <commdlg.h>
 
-#include "MSHImport.h"
+#include "FBXImport.h"
 
 extern TCHAR *GetString(int id);
 extern TSTR shortDescription;
 extern HINSTANCE hInstance;
 
 enum { import_params, };  // pblock ID
-enum { imp_msh_params, };
+enum { imp_fbx_params, };
 enum 
 { 
    IMP_PB_SHORTDESC,

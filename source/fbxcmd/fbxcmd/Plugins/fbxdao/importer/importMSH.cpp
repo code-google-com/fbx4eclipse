@@ -468,15 +468,15 @@ KFbxNode *MSHImportImpl::ImportMESH(  KFbxNode* pParentNode
 
 	if (!meshRef.isNull()){
 		// Set attributes
-		this->SetUserPropString(pNode, "DAO_ID", meshRef->get_id());
-		this->SetUserPropInt(pNode, "DAO_RuntimeShadow", meshRef->get_meshCastRuntimeShadow());
-		this->SetUserPropInt(pNode, "DAO_BakedShadow", meshRef->get_meshCastBakedShadow());
-		this->SetUserPropInt(pNode, "DAO_ReceiveRuntimeShadow", meshRef->get_meshReceiveRuntimeShadow());
-		this->SetUserPropInt(pNode, "DAO_ReceiveBakedShadow", meshRef->get_meshReceiveBakedShadow());
-		this->SetUserPropInt(pNode, "DAO_CutAway", meshRef->get_meshCutAway());
-		this->SetUserPropInt(pNode, "DAO_PunchThrough", meshRef->get_meshCastRuntimeShadow());
-		this->SetUserPropInt(pNode, "DAO_IsVFX", meshRef->get_meshIsVfxMesh());
-		this->SetUserPropInt(pNode, "DAO_VariationTint", meshRef->get_useVariationTint());
+		this->SetPropString(pNode, "DAO_ID", meshRef->get_id());
+		this->SetPropInt(pNode, "DAO_RuntimeShadow", meshRef->get_meshCastRuntimeShadow());
+		this->SetPropInt(pNode, "DAO_BakedShadow", meshRef->get_meshCastBakedShadow());
+		this->SetPropInt(pNode, "DAO_ReceiveRuntimeShadow", meshRef->get_meshReceiveRuntimeShadow());
+		this->SetPropInt(pNode, "DAO_ReceiveBakedShadow", meshRef->get_meshReceiveBakedShadow());
+		this->SetPropInt(pNode, "DAO_CutAway", meshRef->get_meshCutAway());
+		this->SetPropInt(pNode, "DAO_PunchThrough", meshRef->get_meshCastRuntimeShadow());
+		this->SetPropInt(pNode, "DAO_IsVFX", meshRef->get_meshIsVfxMesh());
+		this->SetPropInt(pNode, "DAO_VariationTint", meshRef->get_useVariationTint());
 
 		Text matObj = meshRef->get_materialObject();
 		if (!matObj.isNull())

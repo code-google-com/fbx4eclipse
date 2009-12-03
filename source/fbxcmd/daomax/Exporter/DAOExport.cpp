@@ -9,8 +9,8 @@
  *>	Copyright (c) 2009, All Rights Reserved.
  **********************************************************************/
 #include "DAOExport.h"
-#include "MSHExport.h"
-#include "MMHExport.h"
+//#include "MSHExport.h"
+//#include "MMHExport.h"
 #include <shlwapi.h>
 
 const Class_ID DAOExport_CLASS_ID(0x3D0B6A15, 0x29CC403C);
@@ -462,7 +462,7 @@ int DAOExport::DoExport(const TCHAR *filename, ExpInterface *i,Interface *gi, BO
    try 
    {
       HoldSuspend myHold(TRUE);
-
+#if 0
       LPCTSTR ext = PathFindExtension(filename);
       if (_tcsicmp(ext, ".MSH") == 0)
       {
@@ -497,6 +497,7 @@ int DAOExport::DoExport(const TCHAR *filename, ExpInterface *i,Interface *gi, BO
 			  return FALSE;
 		  ok = Exporter.DoExport();
 	  }
+#endif
    }
    //catch (RuntimeError &e)
    //{
