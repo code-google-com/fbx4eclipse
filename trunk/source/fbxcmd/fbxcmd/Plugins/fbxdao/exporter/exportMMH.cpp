@@ -51,9 +51,9 @@ public:
 	template <class T>
 	T GetProp(LPCTSTR name, T defaultValue)
 	{
-		//IOSREF.GetBoolProp(name, default);
-		return defaultValue;
+		return exportSettings.GetSetting(name, defaultValue);
 	}
+
 	Text GetDiffuseMaterialName(KFbxLayerContainer* lLayerContainer);
 
 	void ExportMaterialObject( KFbxMesh* pMesh, LPCTSTR matName, LPCTSTR texName);
@@ -63,6 +63,10 @@ public:
 	void BuildBoneMap(KFbxNode* lNode);
 
 	void AddBoneIndex( KFbxNode* lNode, bool force );
+
+	void UpdateTangentSpace(KFbxMesh *pMesh);
+	bool NeedTangentSpace(KFbxMesh *pMesh);
+
 	//////////////////////////////////////////////////////////////////////////
 
 	AppSettings exportSettings;
@@ -77,6 +81,8 @@ public:
 	Node2IndexMap node2Index;
 	Index2NodeMap index2Node;
 	Text currentId;
+	int meshId;
+	int nodeId;
 
 	Text GetNextId();
 };
@@ -128,6 +134,7 @@ MMHExportImpl::MMHExportImpl( DAOWriter *owner, KFbxScene* scene, KFbxStreamOpti
 {
 	Text name;
 	currentId = "_a";
+	meshId = nodeId = 1;
 
 	flipUV = GetProp<bool>("FlipUV", true);
 
@@ -141,6 +148,9 @@ MMHExportImpl::MMHExportImpl( DAOWriter *owner, KFbxScene* scene, KFbxStreamOpti
 	mmhfile.swap( DAOStream::Create(name, false) );
 	if (mmhfile.isNull())
 		KFbxLog::LogError("Could not create file: %s", mmhfname.c_str());
+	else
+		KFbxLog::LogInfo("Exporting: %s", mmhfname.c_str() );
+
 
 	mshfname = mmhfname;
 	PathRemoveExtension(mshfname);
@@ -149,6 +159,8 @@ MMHExportImpl::MMHExportImpl( DAOWriter *owner, KFbxScene* scene, KFbxStreamOpti
 	mshfile.swap(DAOStream::Create(name, false));
 	if (mshfile.isNull())
 		KFbxLog::LogError("Could not create file: %s", mshfname.c_str());
+	else
+		KFbxLog::LogInfo("Exporting: %s", mshfname.c_str() );
 }
 
 bool MMHExportImpl::CalcBoundingBox(KFbxNode* lNode, KFbxVector4& bmin, KFbxVector4& bmax )
@@ -190,6 +202,29 @@ bool MMHExportImpl::DoExport()
 {
 	if (mmhfile.isNull() || mshfile.isNull())
 		return false;
+
+	KFbxGlobalSettings& globals = lScene->GetGlobalSettings();
+
+	KFbxAxisSystem SceneAxisSystem = globals.GetAxisSystem();
+	KFbxAxisSystem OurAxisSystem(KFbxAxisSystem::ZAxis, KFbxAxisSystem::ParityEven, KFbxAxisSystem::RightHanded);
+	if( SceneAxisSystem != OurAxisSystem ) {
+		OurAxisSystem.ConvertScene(lScene);
+	}
+
+	double scaleFactor = GetProp<double>("ScaleFactor", 1.0);
+	// Convert Unit System to what is used in this example, if needed
+	KFbxSystemUnit SceneSystemUnit = lScene->GetGlobalSettings().GetSystemUnit();
+	if( SceneSystemUnit.GetScaleFactor() != scaleFactor )
+	{
+		KFbxSystemUnit OurSystemUnit(scaleFactor);
+		OurSystemUnit.ConvertScene(lScene);
+	}
+	else
+	{
+		KFbxSystemUnit OurSystemUnit(scaleFactor);
+		OurSystemUnit.ConvertScene(lScene);
+	}
+
 
 	bool ok = true;
 	mmhwriter = DAOXmlWriter::Create(this->mmhfile);
@@ -244,49 +279,97 @@ void MMHExportImpl::ExportObject(KFbxNode* lNode, LPCTSTR name)
 		switch (lAttributeType)
 		{
 		case KFbxNodeAttribute::eUNIDENTIFIED:
+			KFbxLog::LogWarn("Skipping '%s' as type is unidentified.", cname );  
+			break;
+
 		case KFbxNodeAttribute::eNULL:
-			ExportNode(lNode, name);
+			KFbxLog::LogVerbose("Exporting NULL '%s' as Node", cname );  
+			ExportNode(lNode, NULL);
 			break;
 
 		case KFbxNodeAttribute::eMARKER:
+			KFbxLog::LogWarn("Skipping '%s' as MARKER is not supported.", cname );  
 			break;
 
 		case KFbxNodeAttribute::eSKELETON:
-			ExportSkeleton((KFbxSkeleton*)pAttr, name);
+			KFbxLog::LogVerbose("Exporting Skeleton '%s' as Bone", cname );  
+			ExportSkeleton((KFbxSkeleton*)pAttr, NULL);
 			break;
 
 		case KFbxNodeAttribute::eMESH:
-			ExportMesh((KFbxMesh*)pAttr, name);
+			KFbxLog::LogVerbose("Exporting Mesh '%s'", cname );  
+			ExportMesh((KFbxMesh*)pAttr, NULL);
 			break;
 
-		case KFbxNodeAttribute::eNURB:
+		case KFbxNodeAttribute::eNURB:					
+			KFbxLog::LogWarn("Skipping '%s' as NURB is not supported.", cname );  
+			break;
+
 		case KFbxNodeAttribute::ePATCH:
+			KFbxLog::LogWarn("Skipping '%s' as PATCH is not supported.", cname );  
+			break;
+
 		case KFbxNodeAttribute::eCAMERA:
+			KFbxLog::LogVerbose("Skipping '%s' as CAMERA is not supported.", cname );  
+			break;
+
 		case KFbxNodeAttribute::eCAMERA_STEREO:
+			KFbxLog::LogVerbose("Skipping '%s' as CAMERA_STEREO is not supported.", cname );  
+			break;
+
 		case KFbxNodeAttribute::eCAMERA_SWITCHER:
+			KFbxLog::LogVerbose("Skipping '%s' as CAMERA_SWITCHER is not supported.", cname );  
+			break;
+
 		case KFbxNodeAttribute::eLIGHT:
+			KFbxLog::LogWarn("Skipping '%s' as LIGHT is not supported.", cname );  
+			break;
 		case KFbxNodeAttribute::eOPTICAL_REFERENCE:
+			KFbxLog::LogWarn("Skipping '%s' as OPTICAL_REFERENCE is not supported.", cname );  
+			break;
 		case KFbxNodeAttribute::eOPTICAL_MARKER:
+			KFbxLog::LogWarn("Skipping '%s' as OPTICAL_MARKER is not supported.", cname );  
+			break;
 		case KFbxNodeAttribute::eNURBS_CURVE:
+			KFbxLog::LogWarn("Skipping '%s' as NURBS_CURVE is not supported.", cname );  
+			break;
 		case KFbxNodeAttribute::eTRIM_NURBS_SURFACE:
+			KFbxLog::LogWarn("Skipping '%s' as TRIM_NURBS_SURFACE is not supported.", cname );  
+			break;
 		case KFbxNodeAttribute::eBOUNDARY:
+			KFbxLog::LogWarn("Skipping '%s' as BOUNDARY is not supported.", cname );  
+			break;
 		case KFbxNodeAttribute::eNURBS_SURFACE:
+			KFbxLog::LogWarn("Skipping '%s' as NURBS_SURFACE is not supported.", cname );  
+			break;
 		case KFbxNodeAttribute::eSHAPE:
+			KFbxLog::LogWarn("Skipping '%s' as SHAPE is not supported.", cname );  
+			break;
+
 		case KFbxNodeAttribute::eLODGROUP:
+			KFbxLog::LogWarn("Skipping '%s' as LODGROUP is not supported.", cname );  
+			break;
 		case KFbxNodeAttribute::eSUBDIV:
+			KFbxLog::LogWarn("Skipping '%s' as SUBDIV is not supported.", cname );  
 			break;
 		}
 	}
 	else
 	{
-		ExportNode(lNode, name);
+		KFbxLog::LogVerbose("Exporting '%s' as Node", cname );  
+		ExportNode(lNode, NULL);
 	}
 }
 
 void MMHExportImpl::ExportNode(KFbxNode* lNode, LPCTSTR name, bool bbox)
 {
+	TCHAR buffer[32];
 	if (name == NULL) name = lNode->GetName();
-
+	if (name == NULL || name[0] == 0)
+	{
+		sprintf(buffer, "Node%02d", nodeId++);
+		name = buffer;
+	}
 	mmhwriter->StartElement("Node");
 	mmhwriter->WriteAttribute("Name", name);
 	//mmhwriter->WriteAttribute("SoundMaterialType", "0");
@@ -347,7 +430,13 @@ void MMHExportImpl::ExportNode(KFbxNode* lNode, LPCTSTR name, bool bbox)
 void MMHExportImpl::ExportSkeleton( KFbxSkeleton* lSkel, LPCSTR name )
 {
 	KFbxNode *lNode = lSkel->GetNode();
-	if (name == NULL) name = lSkel->GetName();
+	TCHAR buffer[32];
+	if (name == NULL) name = lNode->GetName();
+	if (name == NULL || name[0] == 0)
+	{
+		sprintf(buffer, "Node%02d", nodeId++);
+		name = buffer;
+	}
 
 	mmhwriter->StartElement("Node");
 	mmhwriter->WriteAttribute("Name", name);
@@ -522,8 +611,20 @@ typedef vector<SkinWeightList> BoneWeightList;
 
 void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 {
-	if (name == NULL) name = pMesh->GetName();
+	TCHAR buffer[32];
 	KFbxNode* lNode = pMesh->GetNode();
+	if (name == NULL || name[0] == 0) name = pMesh->GetName();
+	if ((name == NULL || name[0] == 0) && lNode != NULL) name = lNode->GetName();
+	if (name == NULL || name[0] == 0)
+	{
+		sprintf(buffer, "Mesh%02d", meshId++);
+		name = buffer;
+	}
+	
+	pMesh->ComputeVertexNormals();
+
+	if (NeedTangentSpace(pMesh))
+		UpdateTangentSpace(pMesh);
 
 	pMesh->ComputeBBox();
 	fbxDouble3 bmin = pMesh->BBoxMin.Get();
@@ -781,6 +882,11 @@ void MMHExportImpl::ExportMaterialObject( KFbxMesh* pMesh, LPCTSTR matName, LPCT
 	Text matFName = matName;
 	matFName.append(".mao");
 	DAOStreamPtr maofile( DAOStream::Create(matFName, false) );
+	if (maofile.isNull())
+		KFbxLog::LogError("Could not create file: %s", matFName.c_str());
+	else
+		KFbxLog::LogInfo("Exporting: %s", matFName.c_str() );
+
 	DAOXmlWriterPtr writer = DAOXmlWriter::Create(maofile);
 	writer->SetIndent(1);
 	writer->SetIndentString("  ");
@@ -896,7 +1002,7 @@ void MMHExportImpl::AddBoneIndex( KFbxNode* lNode, bool force )
 			int idx = GetFirstFreeBone();
 			if (idx >= index2Node.size())
 				index2Node.resize(idx+1, NULL);
-			node2Index[lNode] = iBoneIndex;
+			node2Index[lNode] = idx;
 			index2Node[idx] = lNode;
 		}
 	}
@@ -915,4 +1021,119 @@ Text MMHExportImpl::GetNextId()
 		++currentId[len-1];
 	}
 	return id;
+}
+
+static inline KFbxVector4 Scale(const KFbxVector4& v, float s )
+{
+	KFbxVector4 res(v);
+	res *= s;
+	return res;
+}
+static inline KFbxVector4 Normalize(const KFbxVector4& v )
+{
+	KFbxVector4 res(v);
+	res.Normalize();
+	return res;
+}
+
+bool MMHExportImpl::NeedTangentSpace(KFbxMesh *pMesh)
+{
+	KFbxLayerElementUV const* pUVs = pMesh->GetLayer(0)->GetUVs();
+	KFbxLayerElementTangent* pTangentLayer = pMesh->GetLayer(0)->GetTangents();
+	KFbxLayerElementBinormal* pBinormLayer = pMesh->GetLayer(0)->GetBinormals();
+
+	return (pUVs != NULL) && ((pTangentLayer == NULL) || (pBinormLayer == NULL));
+}
+
+void MMHExportImpl::UpdateTangentSpace(KFbxMesh *pMesh)
+{
+	int lVertexCount = pMesh->GetControlPointsCount();
+	KFbxLayerElementUV const* pUVs = pMesh->GetLayer(0)->GetUVs();
+	if (pUVs == NULL)
+		return;
+
+	KFbxLayerElementArrayTemplate<KFbxVector2>& uvs = pUVs->GetDirectArray();
+
+	KFbxLayer* lLayer = pMesh->GetLayer(0);
+	KFbxLayerElementTangent* pTangentLayer = lLayer->GetTangents();
+	if (pTangentLayer == NULL)
+	{
+		pTangentLayer = KFbxLayerElementTangent::Create(pMesh, "Tangents");
+		pTangentLayer->SetMappingMode(KFbxLayerElement::eBY_CONTROL_POINT);
+		pTangentLayer->SetReferenceMode(KFbxLayerElement::eDIRECT);
+		lLayer->SetTangents(pTangentLayer);
+	}
+	KFbxLayerElementBinormal* pBinormLayer = pMesh->GetLayer(0)->GetBinormals();
+	if (pBinormLayer == NULL)
+	{
+		pBinormLayer = KFbxLayerElementBinormal::Create(pMesh, "Binormals");
+		pBinormLayer->SetMappingMode(KFbxLayerElement::eBY_CONTROL_POINT);
+		pBinormLayer->SetReferenceMode(KFbxLayerElement::eDIRECT);
+		lLayer->SetBinormals(pBinormLayer);
+	}
+	KFbxLayerElementArrayTemplate<KFbxVector4>& aTangents = pTangentLayer->GetDirectArray();
+	aTangents.Resize(lVertexCount);
+	KFbxLayerElementArrayTemplate<KFbxVector4>& aBinorms = pBinormLayer->GetDirectArray();
+	aBinorms.Resize(lVertexCount);
+
+	KFbxVector4 emptyVert(0.0, 0.0, 0.0, 0.0);
+	for ( int i = 0; i < lVertexCount; i++ ) {	
+		aBinorms[i] = emptyVert;
+		aTangents[i] = emptyVert;
+	}
+
+	KFbxVector4* pVerts = pMesh->GetControlPoints();
+	int lPolygonCount = pMesh->GetPolygonCount();
+
+	// Handle Tangents and Binormals
+	for ( int lPolygon = 0; lPolygon < lPolygonCount; ++lPolygon )   // for each face
+	{
+		int lPolySize = pMesh->GetPolygonSize(lPolygon);
+
+		// get vertex numbers
+		int i0 = pMesh->GetPolygonVertex(lPolygon, 0);
+		int i1 = pMesh->GetPolygonVertex(lPolygon, 1);
+		int i2 = pMesh->GetPolygonVertex(lPolygon, 2);
+
+		KFbxVector4& v0 = pVerts[i0];
+		KFbxVector4& v1 = pVerts[i1];
+		KFbxVector4& v2 = pVerts[i2];
+
+		KFbxVector4 side_0 = v0 - v1;
+		KFbxVector4 side_1 = v2 - v1;
+
+		int iuv0 = pMesh->GetTextureUVIndex(lPolygon, 0);
+		int iuv1 = pMesh->GetTextureUVIndex(lPolygon, 1);
+		int iuv2 = pMesh->GetTextureUVIndex(lPolygon, 2);
+
+		float delta_U_0 = uvs[iuv0][0] - uvs[iuv1][0];
+		float delta_U_1 = uvs[iuv2][0] - uvs[iuv1][0];
+		float delta_V_0 = uvs[iuv0][1] - uvs[iuv1][1];
+		float delta_V_1 = uvs[iuv2][1] - uvs[iuv1][1];
+
+		KFbxVector4 face_tangent = Normalize( Scale(side_0, delta_V_1) - Scale(side_1, delta_V_0) );
+		KFbxVector4 face_bi_tangent = Normalize( Scale(side_0, delta_U_1) - Scale(side_1, delta_U_0) ); 
+		KFbxVector4 face_normal = Normalize( side_0.CrossProduct( side_1 ) );
+		
+		float face_winding = 1.0f;
+		if ( (face_tangent.CrossProduct(face_bi_tangent)).DotProduct( face_normal ) < 0 ) {
+			face_bi_tangent = -face_bi_tangent;
+			face_winding = 1.0f;
+		}
+		else {
+			face_winding = -1.0f;
+		}
+		// no duplication, just smoothing
+		for (int i=0; i<lPolySize; ++i) {
+			int idx = pMesh->GetPolygonVertex(lPolygon, i);
+			aTangents.SetAt( idx, aTangents.GetAt(idx) + face_tangent);
+			aBinorms.SetAt( idx, aBinorms.GetAt(idx) + face_bi_tangent);
+		}
+	}
+
+	// for each.getPosition(), normalize the Tangent and Binormal
+	for ( int i = 0; i < lVertexCount; i++ ) {	
+		aTangents.SetAt( i, Normalize(aTangents.GetAt(i)) );
+		aBinorms.SetAt( i, Normalize(aBinorms.GetAt(i)) );
+	}
 }

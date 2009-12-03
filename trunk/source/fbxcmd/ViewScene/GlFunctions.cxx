@@ -62,6 +62,9 @@
 #define GL_BGR_EXT GL_BGR
 #endif
 
+//Global Variables
+extern bool bFlipUV;
+
 extern KArrayTemplate<VSTexture*> gTextureArray;
 
 void GlGetWindowSize(int& pWidth, int& pHeight)
@@ -242,7 +245,8 @@ void GlDrawMesh(KFbxXMatrix& pGlobalPosition, KFbxMesh* pMesh, KFbxVector4* pVer
 					double uvs[2];
 					uvs[0] = lUVArray->GetAt(lCurrentUVIndex).GetAt(0);
 					uvs[1] = lUVArray->GetAt(lCurrentUVIndex).GetAt(1);
-					uvs[1] = 1.0 - uvs[1];
+					if (bFlipUV)
+						uvs[1] = 1.0 - uvs[1];
                     glTexCoord2dv(uvs);
 				}
             }

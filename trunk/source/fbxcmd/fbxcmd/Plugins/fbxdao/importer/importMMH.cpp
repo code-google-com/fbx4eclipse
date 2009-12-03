@@ -59,6 +59,12 @@ public:
 	KFbxXMatrix GetGlobalDefaultPosition(KFbxNode* pNode);
 	//////////////////////////////////////////////////////////////////////////
 
+	template <class T>
+	T GetProp(LPCTSTR name, T defaultValue)
+	{
+		return importSettings.GetSetting(name, defaultValue);
+	}
+
 	AppSettings importSettings;
 	AppSettings environmentSettings;
 
