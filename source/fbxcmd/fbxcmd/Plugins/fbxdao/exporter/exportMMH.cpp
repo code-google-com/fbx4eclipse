@@ -962,7 +962,8 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 			for ( int iPoly=0; iPoly < lPolySize; ++iPoly)
 			{
 				int iVert = pMesh->GetPolygonVertex(lPolygon, iPoly);
-				sstr.AppendFormat( "%d ", iCurVert++ );
+				//sstr.AppendFormat( "%d ", iCurVert++ );
+				sstr.AppendFormat( "%d ", iVert ); 
 			}
 			sstr.append('\n');
 		}
