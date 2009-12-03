@@ -138,6 +138,55 @@ bool DAOWriter::WriteMMH( KFbxDocument* pDocument, KFbxStreamOptions* pStreamOpt
 }
 
 
+// Recursive function to get a node's global default position.
+// As a prerequisite, parent node's default local position must be already set.
+KFbxXMatrix GetGlobalDefaultPosition(KFbxNode* pNode)
+{
+	KFbxXMatrix lLocalPosition;
+	KFbxXMatrix lGlobalPosition;
+	KFbxXMatrix lParentGlobalPosition;
+
+	KFbxVector4 lT, lR, lS;
+	lLocalPosition.SetT(pNode->GetDefaultT(lT));
+	lLocalPosition.SetR(pNode->GetDefaultR(lR));
+	lLocalPosition.SetS(pNode->GetDefaultS(lS));
+
+	if (pNode->GetParent())
+	{
+		lParentGlobalPosition = GetGlobalDefaultPosition(pNode->GetParent());
+		lGlobalPosition = lParentGlobalPosition * lLocalPosition;
+	}
+	else
+	{
+		lGlobalPosition = lLocalPosition;
+	}
+
+	return lGlobalPosition;
+}
+
+// Function to get a node's global default position.
+// As a prerequisite, parent node's default local position must be already set.
+void SetGlobalDefaultPosition(KFbxNode* pNode, KFbxXMatrix pGlobalPosition)
+{
+	KFbxXMatrix lLocalPosition;
+	KFbxXMatrix lParentGlobalPosition;
+
+	if (pNode->GetParent())
+	{
+		lParentGlobalPosition = GetGlobalDefaultPosition(pNode->GetParent());
+		lLocalPosition = lParentGlobalPosition.Inverse() * pGlobalPosition;
+	}
+	else
+	{
+		lLocalPosition = pGlobalPosition;
+	}
+
+	pNode->SetDefaultT(lLocalPosition.GetT());
+	pNode->SetDefaultR(lLocalPosition.GetR());
+	pNode->SetDefaultS(lLocalPosition.GetS());
+}
+
+
 MMHExportImpl::MMHExportImpl( DAOWriter *owner, KFbxScene* scene, KFbxStreamOptions* options, LPCSTR filename ) 
 	: base(owner, scene, options, filename)
 	, mmhExportSettings("MMHExport")
@@ -273,8 +322,9 @@ bool MMHExportImpl::DoExport()
 		if (lNode != NULL && _tcsicmp(lNode->GetName(), "GOB") == 0)
 			lRoot = lRoot->GetChild(0);
 	}
-	//KFbxXMatrix gm = lRoot->GetGlobalFromDefaultTake();
-	//CollapseTransforms( lRoot, gm );
+	KFbxXMatrix gm = lRoot->GetGlobalFromDefaultTake();
+	//KFbxXMatrix wm = lRoot->GetGlobalState();
+	CollapseTransforms( lRoot, gm );
 
 	ExportNode( lRoot, "GOB", true );
 
@@ -545,7 +595,8 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 
 	if (!allowSharedVertices)
 	{
-		pMesh->ComputeVertexNormals();
+		if (NULL == pMesh->GetLayer(0)->GetNormals())
+			pMesh->ComputeVertexNormals();
 		if (HasSharedVertices(pMesh))
 		{
 			try
@@ -567,7 +618,8 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 	}
 	else
 	{
-		pMesh->ComputeVertexNormals();
+		if (NULL == pMesh->GetLayer(0)->GetNormals())
+			pMesh->ComputeVertexNormals();
 		if (NeedTangentSpace(pMesh))
 		{
 			KFbxLog::LogVerbose("Updating Tangent Space for '%s'", name);
@@ -696,9 +748,26 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 		mshwriter->WriteAttribute("Semantic", "POSITION");
 		mshwriter->WriteAttribute("Type", "Float4");
 		Text sstr;
-		for (int iVertex=0; iVertex < lVertexCount; ++iVertex) {
-			KFbxVector4& v = pVerts[iVertex];
-			sstr.AppendFormat("%g %g %g %g\n", (double)v[0], (double)v[1], (double)v[2], 1.0);
+		if (lMappingMode == KFbxLayerElement::eBY_POLYGON_VERTEX)
+		{
+			int lPolygonCount = pMesh->GetPolygonCount();
+			for ( int lPolygon = 0; lPolygon < lPolygonCount; ++lPolygon )   // for each face
+			{
+				int lPolySize = pMesh->GetPolygonSize(lPolygon);
+				for ( int iPoly=0; iPoly < lPolySize; ++iPoly)
+				{
+					int iVert = pMesh->GetPolygonVertex(lPolygon, iPoly);
+					KFbxVector4 &v = pVerts[iVert];
+					sstr.AppendFormat("%g %g %g %g\n", (double)v[0], (double)v[1], (double)v[2], 1.0);
+				}
+			}
+		}
+		else
+		{
+			for (int iVertex=0; iVertex < lVertexCount; ++iVertex) {
+				KFbxVector4& v = pVerts[iVertex];
+				sstr.AppendFormat("%g %g %g %g\n", (double)v[0], (double)v[1], (double)v[2], 1.0);
+			}
 		}
 		mshwriter->WriteCDATA(sstr);
 		mshwriter->EndElement(); // Data
@@ -715,12 +784,25 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 		mshwriter->WriteAttribute("Type", "Float2");
 
 		Text sstr;
-		for (int iVertex=0; iVertex < lVertexCount; ++iVertex) {
-			KFbxVector2 uvw = uvs[iVertex];
-			if (uvw[0] < 0.0f || uvw[0] > 1.0f) uvw[0] -= floor(uvw[0]);
-			if (uvw[1] < 0.0f || uvw[1] > 1.0f) uvw[1] -= floor(uvw[1]);
-			if (flipUV) uvw[1] = 1.0f-uvw[1];
-			sstr.AppendFormat("%g %g\n", (double)uvw[0], (double)uvw[1]);
+		int lPolygonCount = pMesh->GetPolygonCount();
+		for ( int lPolygon = 0; lPolygon < lPolygonCount; ++lPolygon )   // for each face
+		{
+			int lPolySize = pMesh->GetPolygonSize(lPolygon);
+			for ( int iPoly=0; iPoly < lPolySize; ++iPoly)
+			{
+				int iUV;
+				//if (lMappingMode == KFbxLayerElement::eBY_POLYGON_VERTEX) {
+				//	iUV = pMesh->GetTextureUVIndex(lPolygon, iPoly);
+				//} else {
+				//	iUV = pMesh->GetPolygonVertex(lPolygon, iPoly);
+				//}
+				iUV = pMesh->GetPolygonVertex(lPolygon, iPoly);
+				KFbxVector2 uvw = uvs[iUV];
+				if (uvw[0] < 0.0f || uvw[0] > 1.0f) uvw[0] -= floor(uvw[0]);
+				if (uvw[1] < 0.0f || uvw[1] > 1.0f) uvw[1] -= floor(uvw[1]);
+				if (flipUV) uvw[1] = 1.0f-uvw[1];
+				sstr.AppendFormat("%g %g\n", (double)uvw[0], (double)uvw[1]);
+			}
 		}
 		mshwriter->WriteCDATA(sstr);
 
@@ -736,9 +818,26 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 		mshwriter->WriteAttribute("Semantic", "NORMAL");
 		mshwriter->WriteAttribute("Type", "Float4");
 		Text sstr;
-		for (int iVertex=0; iVertex < lVertexCount; ++iVertex){
-			KFbxVector4& v = array[iVertex];
-			sstr.AppendFormat("%g %g %g %g\n", (double)v[0], (double)v[1], (double)v[2], 1.0);
+		if (lMappingMode == KFbxLayerElement::eBY_POLYGON_VERTEX)
+		{
+			int lPolygonCount = pMesh->GetPolygonCount();
+			for ( int lPolygon = 0; lPolygon < lPolygonCount; ++lPolygon )   // for each face
+			{
+				int lPolySize = pMesh->GetPolygonSize(lPolygon);
+				for ( int iPoly=0; iPoly < lPolySize; ++iPoly)
+				{
+					int iVert = pMesh->GetPolygonVertex(lPolygon, iPoly);
+					KFbxVector4 &v = array[iVert];
+					sstr.AppendFormat("%g %g %g %g\n", (double)v[0], (double)v[1], (double)v[2], 1.0);
+				}
+			}
+		}
+		else
+		{
+			for (int iVertex=0; iVertex < lVertexCount; ++iVertex){
+				KFbxVector4& v = array[iVertex];
+				sstr.AppendFormat("%g %g %g %g\n", (double)v[0], (double)v[1], (double)v[2], 1.0);
+			}
 		}
 		mshwriter->WriteCDATA(sstr);
 		mshwriter->EndElement(); // Data
@@ -753,9 +852,26 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 		mshwriter->WriteAttribute("Semantic", "TANGENT");
 		mshwriter->WriteAttribute("Type", "Float4");
 		Text sstr;
-		for (int iVertex=0; iVertex < lVertexCount; ++iVertex){
-			KFbxVector4& v = array[iVertex];
-			sstr.AppendFormat("%g %g %g %g\n", (double)v[0], (double)v[1], (double)v[2], 1.0);
+		if (lMappingMode == KFbxLayerElement::eBY_POLYGON_VERTEX)
+		{
+			int lPolygonCount = pMesh->GetPolygonCount();
+			for ( int lPolygon = 0; lPolygon < lPolygonCount; ++lPolygon )   // for each face
+			{
+				int lPolySize = pMesh->GetPolygonSize(lPolygon);
+				for ( int iPoly=0; iPoly < lPolySize; ++iPoly)
+				{
+					int iVert = pMesh->GetPolygonVertex(lPolygon, iPoly);
+					KFbxVector4 &v = array[iVert];
+					sstr.AppendFormat("%g %g %g %g\n", (double)v[0], (double)v[1], (double)v[2], 1.0);
+				}
+			}
+		}
+		else
+		{
+			for (int iVertex=0; iVertex < lVertexCount; ++iVertex){
+				KFbxVector4& v = array[iVertex];
+				sstr.AppendFormat("%g %g %g %g\n", (double)v[0], (double)v[1], (double)v[2], 1.0);
+			}
 		}
 		mshwriter->WriteCDATA(sstr);
 		mshwriter->EndElement(); // Data
@@ -769,9 +885,26 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 		mshwriter->WriteAttribute("Semantic", "BINORMAL");
 		mshwriter->WriteAttribute("Type", "Float4");
 		Text sstr;
-		for (int iVertex=0; iVertex < lVertexCount; ++iVertex){
-			KFbxVector4& v = array[iVertex];
-			sstr.AppendFormat("%g %g %g %g\n", (double)v[0], (double)v[1], (double)v[2], 1.0);
+		if (lMappingMode == KFbxLayerElement::eBY_POLYGON_VERTEX)
+		{
+			int lPolygonCount = pMesh->GetPolygonCount();
+			for ( int lPolygon = 0; lPolygon < lPolygonCount; ++lPolygon )   // for each face
+			{
+				int lPolySize = pMesh->GetPolygonSize(lPolygon);
+				for ( int iPoly=0; iPoly < lPolySize; ++iPoly)
+				{
+					int iVert = pMesh->GetPolygonVertex(lPolygon, iPoly);
+					KFbxVector4 &v = array[iVert];
+					sstr.AppendFormat("%g %g %g %g\n", (double)v[0], (double)v[1], (double)v[2], 1.0);
+				}
+			}
+		}
+		else
+		{
+			for (int iVertex=0; iVertex < lVertexCount; ++iVertex){
+				KFbxVector4& v = array[iVertex];
+				sstr.AppendFormat("%g %g %g %g\n", (double)v[0], (double)v[1], (double)v[2], 1.0);
+			}
 		}
 		mshwriter->WriteCDATA(sstr);
 		mshwriter->EndElement(); // Data
@@ -803,12 +936,15 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 		mshwriter->WriteAttribute("IndexType", "Index32");
 		mshwriter->WriteAttribute("Semantic", "Indices");
 		Text sstr;
-		for (int lPolygon = 0; lPolygon < lPolygonCount; lPolygon++){
-			int lPolygonSize = pMesh->GetPolygonSize(lPolygon);
-			KFBXLOG_ASSERT(lPolygonSize == 3);
-			for (int lIdx = 0; lIdx < lPolygonSize; lIdx++) {
-				int lControlPointIndex = pMesh->GetPolygonVertex(lPolygon, lIdx);
-				sstr.AppendFormat("%d ", lControlPointIndex);
+		int iCurVert = 0;
+		for ( int lPolygon = 0; lPolygon < lPolygonCount; ++lPolygon )   // for each face
+		{
+			int lPolySize = pMesh->GetPolygonSize(lPolygon);
+			for ( int iPoly=0; iPoly < lPolySize; ++iPoly)
+			{
+				int iVert = pMesh->GetPolygonVertex(lPolygon, iPoly);
+				//sstr.AppendFormat( "%d ", iVert );
+				sstr.AppendFormat( "%d ", iCurVert++ );
 			}
 			sstr.append('\n');
 		}
@@ -1219,7 +1355,8 @@ void MMHExportImpl::RecomputeMeshVertices( KFbxMesh* pMesh )
 
 	}
 	//pMesh->ComputeVertexNormals();
-	pMesh->ComputeVertexNormals();
+	if (NULL == pMesh->GetLayer(0)->GetNormals())
+		pMesh->ComputeVertexNormals();
 	UpdateTangentSpace(pMesh);
 }
 
@@ -1270,22 +1407,19 @@ void MMHExportImpl::ExportNodeTransform( KFbxNode* lNode, bool global )
 		double scl = 1.0;
 		if (global)
 		{
-			KFbxXMatrix m = lNode->GetGlobalFromDefaultTake();
-			lT = m.GetT(), lR = m.GetR(), lS = m.GetS();
+			lS = lNode->GetDefaultS(lS);
 			scl = (double)Average(lS);
 			if ( NotEquals(lS[0], lS[1]) || NotEquals(lS[0], lS[2]) ) {
-				KFbxLog::LogWarn("Node '%s' has non-uniform scale.  This is not supported at this time.", lNode->GetName() );
+				KFbxLog::LogWarn("Node '%s' has non-uniform scale.  Transforms will be collapsed into the node.", lNode->GetName() );
 				scl = 1.0;
 			}
 		}
 		else
 		{
-			lT = lNode->GetLocalTFromDefaultTake();
-			lR = lNode->GetLocalRFromDefaultTake();
-			lS = lNode->GetLocalSFromDefaultTake();
+			lS = lNode->GetDefaultS(lS);
 			scl = (double)Average(lS);
 			if ( NotEquals(lS[0], lS[1]) || NotEquals(lS[0], lS[2]) ) {
-				KFbxLog::LogWarn("Node '%s' has non-uniform scale.  This is not supported at this time.", lNode->GetName() );
+				KFbxLog::LogWarn("Node '%s' has non-uniform scale.  Transforms will be collapsed into the node.", lNode->GetName() );
 				scl = 1.0;
 			}
 		}
@@ -1320,85 +1454,55 @@ void MMHExportImpl::RescaleMesh( KFbxMesh* pMesh, KFbxXMatrix & lm )
 {
 	int lVertexCount = pMesh->GetControlPointsCount();
 	KFbxNode* lNode = pMesh->GetNode();
+	KFbxXMatrix m = lNode->GetGlobalFromDefaultTake();
+	KFbxLayer* lLayer = pMesh->GetLayer(0);
+	KFbxLayerElementNormal* pNormLayer = pMesh->GetLayer(0)->GetNormals();
+	if (pNormLayer == NULL) {
+		pMesh->ComputeVertexNormals();
+		pNormLayer = pMesh->GetLayer(0)->GetNormals();
+	}
+	KFbxLayerElementArrayTemplate<KFbxVector4>& aNorms = pNormLayer->GetDirectArray();
 
-	KFbxVector4 lT = lNode->GetLocalTFromDefaultTake();
-	KFbxVector4 lR = lNode->GetLocalRFromDefaultTake();
-	KFbxVector4 lS = lNode->GetLocalSFromDefaultTake();
-	
-	KFbxXMatrix m;
-	m.SetTRS(lT, lR, lS);
-	m *= lm;
-
-	if (lS[0] != lS[1] || lS[0] != lS[2] || lS[0] != lS[1]) {
-		KFbxLog::LogWarn("Node '%s' has non-uniform scale.  Scale will be collapsed into mesh.", lNode->GetName() );
-		
-		//KFbxXMatrix m;
-		//m.SetS(lS);
-		//m = m.Inverse();
-
-		KFbxVector4* pVerts = pMesh->GetControlPoints();
-		for (int i=0;i<lVertexCount; ++i) {
-			KFbxXMatrix v;
-			v.SetT(pVerts[i]);
-			v = m * v;
-			pVerts[i] = v.GetT();
-			//pVerts[i] = m.MultS(pVerts[i]);
-		}
-
-		//KFbxLayer* lLayer = pMesh->GetLayer(0);
-		//KFbxLayerElementNormal* pNormLayer = pMesh->GetLayer(0)->GetNormals();
-		//if (pNormLayer != NULL)
-		//{
-		//	KFbxLayerElementArrayTemplate<KFbxVector4>& aNorms = pNormLayer->GetDirectArray();
-		//	for (int i=0;i<lVertexCount; ++i)
-		//	{
-		//		KFbxVector4 n = aNorms[i];
-		//		n = m.MultS(n);
-		//		n.Normalize();
-		//		aNorms.SetAt(i, n);
-		//	}
-		//}
-
-		//KFbxVector4 lT = lNode->GetLocalTFromDefaultTake();
-		//KFbxVector4 lR = lNode->GetLocalRFromDefaultTake();
-		//lS[0] = lS[1] = lS[2] = 1.0;
-		//lNode->SetLocalState(lT, lR, lS);
-		lNode->SetLocalState(KFbxVector4(), KFbxVector4(), KFbxVector4(1, 1, 1));
+	KFbxVector4* pVerts = pMesh->GetControlPoints();
+	KFbxLayerElementArrayTemplate<KFbxVector4> oldVerts(EFbxType::eDOUBLE4);
+	oldVerts.Resize(aNorms.GetCount());
+	for (int i=0;i<lVertexCount; ++i) {
+		KFbxXMatrix mv;
+		mv.SetT(pVerts[i]);
+		mv = m * mv;
+		oldVerts.SetAt(i, pVerts[i]);
+		pVerts[i] = mv.GetT();
 	}
 
-	for( int i = 0; i < lNode->GetChildCount(); i++)
+	KFbxLayerElement::EMappingMode lMappingMode = pNormLayer->GetMappingMode();
+	KFbxLayerElement::EReferenceMode lReferenceMode = pNormLayer->GetReferenceMode();
+	int iCurVert = 0;
+	int lPolygonCount = pMesh->GetPolygonCount();
+	for ( int lPolygon = 0; lPolygon < lPolygonCount; ++lPolygon )   // for each face
 	{
-		KFbxNode *lChild = lNode->GetChild(i);
-
-		KFbxVector4 lCT = lChild->GetLocalTFromDefaultTake();
-		KFbxVector4 lCR = lChild->GetLocalRFromDefaultTake();
-		KFbxVector4 lCS = lChild->GetLocalSFromDefaultTake();
-
-		KFbxXMatrix cm;
-		cm.SetTRS(lCT, lCR, lCS);
-		cm = lm * cm;
-
-		lChild->SetLocalState(cm.GetT(), cm.GetR(), cm.GetS());
+		int lPolySize = pMesh->GetPolygonSize(lPolygon);
+		for ( int iPoly=0; iPoly < lPolySize; ++iPoly)
+		{
+			int iVert = pMesh->GetPolygonVertex(lPolygon, iPoly);
+			KFbxVector4 v = oldVerts.GetAt(iVert);
+			KFbxVector4 n = aNorms.GetAt(iCurVert);
+			KFbxXMatrix mn; mn.SetT(v + n);
+			mn = m * mn;
+			KFbxVector4 n2, v2 = pVerts[iVert];
+			n2 = mn.GetT() - v2;
+			n2.Normalize();
+			aNorms.SetAt(iCurVert, n2);
+			++iCurVert;
+		}
 	}
-
 }
 
 void MMHExportImpl::CollapseTransforms( KFbxNode* lNode, KFbxXMatrix lm )
 {
-	KFbxVector4 lT = lNode->GetLocalTFromDefaultTake();
-	KFbxVector4 lR = lNode->GetLocalRFromDefaultTake();
-	KFbxVector4 lS = lNode->GetLocalSFromDefaultTake();
-
-	KFbxXMatrix wm = lNode->GetGlobalFromDefaultTake();
-
-	KFbxXMatrix m;
-	m.SetTRS(lT, lR, lS);
-	m = lm * m;
-
+	KFbxXMatrix m = lNode->GetGlobalFromDefaultTake();
 	for( int i = 0; i < lNode->GetChildCount(); i++)
 	{
 		KFbxNode *lChild = lNode->GetChild(i);
-
 		LPCTSTR cname = lChild->GetName();
 		if ( KFbxNodeAttribute *pAttr = lChild->GetNodeAttribute() )
 		{
@@ -1440,5 +1544,7 @@ void MMHExportImpl::CollapseTransforms( KFbxNode* lNode, KFbxXMatrix lm )
 		CollapseTransforms(lChild, m);
 	}
 
-	lNode->SetLocalState(m.GetT(), KFbxVector4(), KFbxVector4(1, 1, 1));
+	KFbxXMatrix identityMatrix;
+	SetGlobalDefaultPosition(lNode, identityMatrix);
+	lNode->SetDefaultTakeFromLocalState(false);
 }

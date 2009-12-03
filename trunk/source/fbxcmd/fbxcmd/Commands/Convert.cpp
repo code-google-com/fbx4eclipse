@@ -54,6 +54,157 @@ public:
 };
 #pragma endregion
 
+
+
+// Recursive function to get a node's global default position.
+// As a prerequisite, parent node's default local position must be already set.
+KFbxXMatrix GetGlobalDefaultPosition(KFbxNode* pNode)
+{
+	KFbxXMatrix lLocalPosition;
+	KFbxXMatrix lGlobalPosition;
+	KFbxXMatrix lParentGlobalPosition;
+
+	KFbxVector4 lT, lR, lS;
+	lLocalPosition.SetT(pNode->GetDefaultT(lT));
+	lLocalPosition.SetR(pNode->GetDefaultR(lR));
+	lLocalPosition.SetS(pNode->GetDefaultS(lS));
+
+	if (pNode->GetParent())
+	{
+		lParentGlobalPosition = GetGlobalDefaultPosition(pNode->GetParent());
+		lGlobalPosition = lParentGlobalPosition * lLocalPosition;
+	}
+	else
+	{
+		lGlobalPosition = lLocalPosition;
+	}
+
+	return lGlobalPosition;
+}
+
+// Function to get a node's global default position.
+// As a prerequisite, parent node's default local position must be already set.
+void SetGlobalDefaultPosition(KFbxNode* pNode, KFbxXMatrix pGlobalPosition)
+{
+	KFbxXMatrix lLocalPosition;
+	KFbxXMatrix lParentGlobalPosition;
+
+	if (pNode->GetParent())
+	{
+		lParentGlobalPosition = GetGlobalDefaultPosition(pNode->GetParent());
+		lLocalPosition = lParentGlobalPosition.Inverse() * pGlobalPosition;
+	}
+	else
+	{
+		lLocalPosition = pGlobalPosition;
+	}
+
+	pNode->SetDefaultT(lLocalPosition.GetT());
+	pNode->SetDefaultR(lLocalPosition.GetR());
+	pNode->SetDefaultS(lLocalPosition.GetS());
+}
+
+void RescaleMesh(KFbxSdkManager* pSdkManager, KFbxMesh* pMesh, KFbxXMatrix & lm )
+{
+	int lVertexCount = pMesh->GetControlPointsCount();
+	KFbxNode* lNode = pMesh->GetNode();
+	KFbxXMatrix m = lNode->GetGlobalFromDefaultTake();
+	KFbxLayer* lLayer = pMesh->GetLayer(0);
+	KFbxLayerElementNormal* pNormLayer = pMesh->GetLayer(0)->GetNormals();
+	if (pNormLayer == NULL) {
+		pMesh->ComputeVertexNormals();
+		pNormLayer = pMesh->GetLayer(0)->GetNormals();
+	}
+	KFbxLayerElementArrayTemplate<KFbxVector4>& aNorms = pNormLayer->GetDirectArray();
+
+	KFbxVector4* pVerts = pMesh->GetControlPoints();
+	KFbxLayerElementArrayTemplate<KFbxVector4> oldVerts(EFbxType::eDOUBLE4);
+	oldVerts.Resize(aNorms.GetCount());
+	for (int i=0;i<lVertexCount; ++i) {
+		KFbxXMatrix mv;
+		mv.SetT(pVerts[i]);
+		mv = m * mv;
+		oldVerts.SetAt(i, pVerts[i]);
+		pVerts[i] = mv.GetT();
+	}
+
+	KFbxLayerElement::EMappingMode lMappingMode = pNormLayer->GetMappingMode();
+	KFbxLayerElement::EReferenceMode lReferenceMode = pNormLayer->GetReferenceMode();
+	int iCurVert = 0;
+	int lPolygonCount = pMesh->GetPolygonCount();
+	for ( int lPolygon = 0; lPolygon < lPolygonCount; ++lPolygon )   // for each face
+	{
+		int lPolySize = pMesh->GetPolygonSize(lPolygon);
+		for ( int iPoly=0; iPoly < lPolySize; ++iPoly)
+		{
+			int iVert = pMesh->GetPolygonVertex(lPolygon, iPoly);
+			KFbxVector4 v = oldVerts.GetAt(iVert);
+			KFbxVector4 n = aNorms.GetAt(iCurVert);
+			KFbxXMatrix mn; mn.SetT(v + n);
+			mn = m * mn;
+			KFbxVector4 n2, v2 = pVerts[iVert];
+			n2 = mn.GetT() - v2;
+			n2.Normalize();
+			aNorms.SetAt(iCurVert, n2);
+			++iCurVert;
+		}
+	}
+}
+
+void CollapseTransforms(KFbxSdkManager* pSdkManager, KFbxNode* lNode, KFbxXMatrix lm )
+{
+	KFbxXMatrix m = lNode->GetGlobalFromDefaultTake();
+	for( int i = 0; i < lNode->GetChildCount(); i++)
+	{
+		KFbxNode *lChild = lNode->GetChild(i);
+		LPCTSTR cname = lChild->GetName();
+		if ( KFbxNodeAttribute *pAttr = lChild->GetNodeAttribute() )
+		{
+			KFbxNodeAttribute::EAttributeType lAttributeType = pAttr->GetAttributeType();
+			switch (lAttributeType)
+			{
+			case KFbxNodeAttribute::eMESH:
+				if ( KFbxMesh* pMesh = (KFbxMesh*)pAttr )
+				{
+					if (!pMesh->IsTriangleMesh())
+					{
+						KFbxLog::LogInfo("Mesh '%s' is not a triangle mesh.  Triangulating...", cname );
+						KFbxGeometryConverter lConverter(pSdkManager);
+						lConverter.TriangulateInPlace(lChild);
+					}
+					RescaleMesh(pSdkManager, (KFbxMesh*)lChild->GetNodeAttribute(), m);
+				}
+				break;
+
+			case KFbxNodeAttribute::eNURB:					
+				KFbxLog::LogWarn("NURB is not directly supported and will be triangulated. Exporting Mesh '%s'", cname );  
+				{
+					KFbxGeometryConverter lConverter(pSdkManager);
+					lConverter.TriangulateInPlace(lChild);
+					RescaleMesh(pSdkManager, (KFbxMesh*)lChild->GetNodeAttribute(), m);
+				}
+				break;
+
+			case KFbxNodeAttribute::ePATCH:
+				KFbxLog::LogWarn("PATCH is not directly supported and will be triangulated. Exporting Mesh '%s'", cname );  
+				{
+					KFbxGeometryConverter lConverter(pSdkManager);
+					lConverter.TriangulateInPlace(lChild);
+					RescaleMesh(pSdkManager, (KFbxMesh*)lChild->GetNodeAttribute(), m);
+				}
+				break;
+			}
+		}
+		CollapseTransforms(pSdkManager, lChild, m);
+	}
+
+	KFbxXMatrix identityMatrix;
+	SetGlobalDefaultPosition(lNode, identityMatrix);
+	lNode->SetDefaultTakeFromLocalState(false);
+}
+
+
+
 // to get a file extention for a WriteFileFormat
 const char *GetFileFormatExt(KFbxSdkManager* pSdkManager, const int pWriteFileFormat)
 {
@@ -451,6 +602,12 @@ static bool ExecuteCmd(Program &prog)
 			// object allocator for almost all the classes in the SDK.
 
 			if (ok) ok = LoadScene(prog.pSdkManager, pScene, infile.c_str(), informat.c_str());
+
+			//if (ok)
+			//{
+			//	KFbxXMatrix gm = pScene->GetRootNode()->GetGlobalFromDefaultTake();
+			//	CollapseTransforms(prog.pSdkManager, pScene->GetRootNode(), gm );
+			//}
 
 			if (ok) ok = SaveScene(prog.pSdkManager, pScene, outfile.c_str(), outformat.c_str(), embedMedia);
 
