@@ -115,7 +115,7 @@ bool MMHImportImpl::DoImport()
 	KFbxGlobalSettings& globals = lScene->GetGlobalSettings();
 	
 	//globals.SetOriginalUpAxis(  KFbxAxisSystem(KFbxAxisSystem::ZAxis, KFbxAxisSystem::ParityEven, KFbxAxisSystem::RightHanded) );
-	globals.SetAxisSystem( KFbxAxisSystem(KFbxAxisSystem::ZAxis, KFbxAxisSystem::ParityEven, KFbxAxisSystem::RightHanded) );
+	globals.SetAxisSystem( KFbxAxisSystem(KFbxAxisSystem::ZAxis, KFbxAxisSystem::ParityOdd, KFbxAxisSystem::RightHanded) );
 
 	IOSREF.GetBoolProp(IMP_FBX_MATERIAL,        true);
 	IOSREF.GetBoolProp(IMP_FBX_TEXTURE,         true);

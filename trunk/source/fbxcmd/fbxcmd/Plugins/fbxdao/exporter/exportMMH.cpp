@@ -46,12 +46,15 @@ public:
 	void ExportObject(KFbxNode* lNode, LPCTSTR name = NULL);
 	void ExportNode(KFbxNode* lNode, LPCTSTR name = NULL, bool bbox = false);
 	void ExportSkeleton( KFbxSkeleton* lSkel, LPCSTR name = NULL);
+	void StartExportNode(KFbxNode* lNode, LPCTSTR name = NULL);
+	void EndExportNode(KFbxNode* lNode);
 	void ExportMesh( KFbxMesh* lMesh, LPCSTR name = NULL);
 
+	void ExportNodeTransform( KFbxNode* lNode, bool global = false);
 	template <class T>
 	T GetProp(LPCTSTR name, T defaultValue)
 	{
-		return exportSettings.GetSetting(name, defaultValue);
+		return mmhExportSettings.GetSetting(name, defaultValue);
 	}
 
 	Text GetDiffuseMaterialName(KFbxLayerContainer* lLayerContainer);
@@ -67,9 +70,14 @@ public:
 	void UpdateTangentSpace(KFbxMesh *pMesh);
 	bool NeedTangentSpace(KFbxMesh *pMesh);
 
+	void RecomputeMeshVertices( KFbxMesh* pMesh );
+	bool HasSharedVertices( KFbxMesh* pMesh );
+
+	void RescaleMesh( KFbxMesh* pMesh, KFbxXMatrix & lm );
+
 	//////////////////////////////////////////////////////////////////////////
 
-	AppSettings exportSettings;
+	AppSettings mmhExportSettings, mshExportSettings;
 	DAOXmlWriterPtr mmhwriter, mshwriter;
 	DAOStreamPtr mmhfile, mshfile;
 	Text mshfname, mmhfname;
@@ -87,7 +95,7 @@ public:
 
 	Text GetNextId();
 
-	void RecomputeMeshVertices( KFbxMesh* pMesh );
+	void CollapseTransforms( KFbxNode* lRoot, KFbxXMatrix gm );
 
 };
 
@@ -132,7 +140,8 @@ bool DAOWriter::WriteMMH( KFbxDocument* pDocument, KFbxStreamOptions* pStreamOpt
 
 MMHExportImpl::MMHExportImpl( DAOWriter *owner, KFbxScene* scene, KFbxStreamOptions* options, LPCSTR filename ) 
 	: base(owner, scene, options, filename)
-	, exportSettings("MMHExport")
+	, mmhExportSettings("MMHExport")
+	, mshExportSettings("MSHExport")
 	, mmhwriter(NULL), mshwriter(NULL)
 	, mmhfile(NULL), mshfile(NULL)
 {
@@ -140,8 +149,10 @@ MMHExportImpl::MMHExportImpl( DAOWriter *owner, KFbxScene* scene, KFbxStreamOpti
 	currentId = "_a";
 	meshId = nodeId = 1;
 
-	flipUV = GetProp<bool>("FlipUV", true);
-	allowSharedVertices = GetProp<bool>("AllowSharedVertices", false);
+	ResourceManager::LoadSettings(mmhExportSettings);
+	ResourceManager::LoadSettings(mshExportSettings);
+	flipUV = mshExportSettings.GetSetting<bool>("FlipUV", true);
+	allowSharedVertices = mshExportSettings.GetSetting<bool>("AllowSharedVertices", false);
 
 	mmhfname = filename;
 	LPCTSTR ext = PathFindExtension(mmhfname);
@@ -211,6 +222,10 @@ bool MMHExportImpl::DoExport()
 	KFbxGlobalSettings& globals = lScene->GetGlobalSettings();
 
 	KFbxAxisSystem SceneAxisSystem = globals.GetAxisSystem();
+	KFbxSystemUnit::KFbxUnitConversionOptions options;
+	options.mConvertLightIntensity = true;
+	options.mConvertRrsNodes = true;
+
 	KFbxAxisSystem OurAxisSystem(KFbxAxisSystem::ZAxis, KFbxAxisSystem::ParityEven, KFbxAxisSystem::RightHanded);
 	if( SceneAxisSystem != OurAxisSystem ) {
 		OurAxisSystem.ConvertScene(lScene);
@@ -258,6 +273,9 @@ bool MMHExportImpl::DoExport()
 		if (lNode != NULL && _tcsicmp(lNode->GetName(), "GOB") == 0)
 			lRoot = lRoot->GetChild(0);
 	}
+	//KFbxXMatrix gm = lRoot->GetGlobalFromDefaultTake();
+	//CollapseTransforms( lRoot, gm );
+
 	ExportNode( lRoot, "GOB", true );
 
 	mshwriter->EndElement(); // ModelMeshData
@@ -302,16 +320,36 @@ void MMHExportImpl::ExportObject(KFbxNode* lNode, LPCTSTR name)
 			break;
 
 		case KFbxNodeAttribute::eMESH:
-			KFbxLog::LogVerbose("Exporting Mesh '%s'", cname );  
-			ExportMesh((KFbxMesh*)pAttr, NULL);
+			if ( KFbxMesh* pMesh = (KFbxMesh*)pAttr )
+			{
+				if (!pMesh->IsTriangleMesh())
+				{
+					KFbxLog::LogInfo("Mesh '%s' is not a triangle mesh.  Triangulating...", cname );
+					KFbxGeometryConverter lConverter(mManager);
+					lConverter.TriangulateInPlace(lNode);
+				}
+				KFbxLog::LogVerbose("Exporting Mesh '%s'", cname );
+				ExportMesh((KFbxMesh*)lNode->GetNodeAttribute(), NULL);
+
+			}
 			break;
 
 		case KFbxNodeAttribute::eNURB:					
-			KFbxLog::LogWarn("Skipping '%s' as NURB is not supported.", cname );  
+			KFbxLog::LogWarn("NURB is not directly supported and will be triangulated. Exporting Mesh '%s'", cname );  
+			{
+				KFbxGeometryConverter lConverter(mManager);
+				lConverter.TriangulateInPlace(lNode);
+				ExportMesh((KFbxMesh*)lNode->GetNodeAttribute(), NULL);
+			}
 			break;
 
 		case KFbxNodeAttribute::ePATCH:
-			KFbxLog::LogWarn("Skipping '%s' as PATCH is not supported.", cname );  
+			KFbxLog::LogWarn("PATCH is not directly supported and will be triangulated. Exporting Mesh '%s'", cname );  
+			{
+				KFbxGeometryConverter lConverter(mManager);
+				lConverter.TriangulateInPlace(lNode);
+				ExportMesh((KFbxMesh*)lNode->GetNodeAttribute(), NULL);
+			}
 			break;
 
 		case KFbxNodeAttribute::eCAMERA:
@@ -354,8 +392,12 @@ void MMHExportImpl::ExportObject(KFbxNode* lNode, LPCTSTR name)
 		case KFbxNodeAttribute::eLODGROUP:
 			KFbxLog::LogWarn("Skipping '%s' as LODGROUP is not supported.", cname );  
 			break;
+
 		case KFbxNodeAttribute::eSUBDIV:
 			KFbxLog::LogWarn("Skipping '%s' as SUBDIV is not supported.", cname );  
+			break;
+		default:
+			KFbxLog::LogWarn("Skipping unknown attribute for object '%s'.", cname );  
 			break;
 		}
 	}
@@ -366,34 +408,12 @@ void MMHExportImpl::ExportObject(KFbxNode* lNode, LPCTSTR name)
 	}
 }
 
-void MMHExportImpl::ExportNode(KFbxNode* lNode, LPCTSTR name, bool bbox)
+void MMHExportImpl::ExportNode(KFbxNode* lNode, LPCTSTR name, bool root)
 {
-	TCHAR buffer[32];
-	if (name == NULL) name = lNode->GetName();
-	if (name == NULL || name[0] == 0)
-	{
-		sprintf(buffer, "Node%02d", nodeId++);
-		name = buffer;
-	}
-	mmhwriter->StartElement("Node");
-	mmhwriter->WriteAttribute("Name", name);
-	//mmhwriter->WriteAttribute("SoundMaterialType", "0");
-
-	mmhwriter->StartElement("Export");
-	mmhwriter->WriteFormatAttribute("TagName", "%sTranslation", name);
-	mmhwriter->WriteFormatAttribute("ExportName", "%s_%sTranslation", name, name);
-	mmhwriter->WriteFormatAttribute("ControllerType", "%s_Vector3", name);
-	mmhwriter->EndElement();
-
-	mmhwriter->StartElement("Export");
-	mmhwriter->WriteFormatAttribute("TagName", "%sRotation", name);
-	mmhwriter->WriteFormatAttribute("ExportName", "%s_%sRotation", name, name);
-	mmhwriter->WriteFormatAttribute("ControllerType", "%s_Quaternion", name);
-	mmhwriter->EndElement();
-
+	StartExportNode(lNode, NULL);
 	// Calc Bounding Box
 	KFbxVector4 min, max;
-	if ( bbox && CalcBoundingBox(lNode, min, max) )
+	if ( root && CalcBoundingBox(lNode, min, max) )
 	{
 		Text sstr;
 		sstr.AppendFormat("%g %g %g %g %g %g %g %g"
@@ -402,129 +422,17 @@ void MMHExportImpl::ExportNode(KFbxNode* lNode, LPCTSTR name, bool bbox)
 		mmhwriter->StartElement("BoundingBox");
 		mmhwriter->WriteCDATA(sstr);
 		mmhwriter->EndElement();
-	}
-	KFbxVector4 lT, lR, lS;
-	lNode->GetDefaultT(lT);
-	lNode->GetDefaultR(lR);
-	lNode->GetDefaultS(lS);
-	KFbxQuaternion q = ComposeSphericalXYZ(lR);
-
-	//KFbxXMatrix qm;
-	//qm.SetR(lR);
-	//KFbxQuaternion q = qm.GetQ();
-	//
-	{
-		mmhwriter->StartElement("Translation");
-		mmhwriter->WriteFormatCDATA("%g %g %g %g", (double)lT[0], (double)lT[1], (double)lT[2], 1.0);
-		mmhwriter->EndElement();
-	}
-	{
-		mmhwriter->StartElement("Rotation");
-		mmhwriter->WriteFormatCDATA("%g %g %g %g", (double)q[0], (double)q[1], (double)q[2], (double)q[3]);
-		mmhwriter->EndElement();
-	}
-
-	for( int i = 0; i < lNode->GetChildCount(); i++)
-	{
-		ExportObject(lNode->GetChild(i));
-	}
-
-	mmhwriter->EndElement(); // Node
+	}	
+	ExportNodeTransform(lNode, root);
+	EndExportNode(lNode);
 }
 
 void MMHExportImpl::ExportSkeleton( KFbxSkeleton* lSkel, LPCSTR name )
 {
 	KFbxNode *lNode = lSkel->GetNode();
-	TCHAR buffer[32];
-	if (name == NULL) name = lNode->GetName();
-	if (name == NULL || name[0] == 0)
-	{
-		sprintf(buffer, "Node%02d", nodeId++);
-		name = buffer;
-	}
-
-	mmhwriter->StartElement("Node");
-	mmhwriter->WriteAttribute("Name", name);
-	int iBoneIndex = ~0;
-	Node2IndexMap::iterator itr = node2Index.find(lNode);
-	if (itr != node2Index.end())
-	{
-		iBoneIndex = (*itr).second;
-		if (iBoneIndex < 0)
-			iBoneIndex = ~iBoneIndex;
-	}	
-	if (iBoneIndex >= 0)
-	{
-		mmhwriter->WriteFormatAttribute("BoneIndex", "%d", iBoneIndex);
-	}
-
-	KFbxVector4 min, max;
-	if ( CalcBoundingBox(lNode, min, max) )
-	{
-		fbxDouble3 bdim = CalcDim(min, max);
-		fbxDouble3 bmid = CalcMid(min, max);
-
-		KFbxVector4 lT, lR, lS;
-		lNode->GetDefaultR(lR);
-		KFbxQuaternion q = ComposeSphericalXYZ(lR);
-
-		mmhwriter->StartElement("CollisionObject");
-		mmhwriter->WriteAttribute( "Kinematic", "true");
-		{
-			mmhwriter->StartElement("Shape");
-			mmhwriter->WriteFormatAttribute( "Name", "Box_%s", name );
-			mmhwriter->WriteAttribute("Type", "Box");
-			mmhwriter->WriteAttribute("AllowEmitterSpawn", "1");
-			mmhwriter->WriteAttribute("Fadeable", "false");
-			mmhwriter->WriteFormatAttribute("DimY", "%g", bdim[1]);
-			mmhwriter->WriteFormatAttribute("DimZ", "%g", bdim[2]);
-			mmhwriter->WriteFormatAttribute("DimX", "%g", bdim[0]);
-			mmhwriter->WriteAttribute("GROUP_MASK_PLACEABLES", "true");
-			mmhwriter->WriteAttribute("GROUP_MASK_WALKABLE", "false");
-			mmhwriter->WriteAttribute("GROUP_MASK_NONWALKABLE", "true");
-			mmhwriter->WriteFormatAttribute("Rotation", "%g %g %g %g", (double)q[0], (double)q[1], (double)q[2], (double)q[3]);
-			mmhwriter->WriteFormatAttribute("Position", "%g %g %g %g", (double)bmid[0], (double)bmid[1], (double)bmid[2], 1.0);
-			mmhwriter->EndElement();
-		}
-		mmhwriter->EndElement();
-	}
-	//mmhwriter->WriteAttribute("SoundMaterialType", "0");
-
-	mmhwriter->StartElement("Export");
-	mmhwriter->WriteAttribute("TagName", "Translation");
-	mmhwriter->WriteFormatAttribute("ExportName", "%s_Translation", name);
-	mmhwriter->WriteAttribute("ControllerType", "Vector3");
-	mmhwriter->EndElement();
-
-	mmhwriter->StartElement("Export");
-	mmhwriter->WriteAttribute("TagName", "Rotation");
-	mmhwriter->WriteFormatAttribute("ExportName", "%s_Rotation", name);
-	mmhwriter->WriteAttribute("ControllerType", "Quaternion");
-	mmhwriter->EndElement();
-
-	KFbxVector4 lT, lR, lS;
-	lNode->GetDefaultT(lT);
-	lNode->GetDefaultR(lR);
-	lNode->GetDefaultS(lS);
-	
-	KFbxQuaternion q = ComposeSphericalXYZ(lR);
-	{
-		mmhwriter->StartElement("Translation");
-		mmhwriter->WriteFormatCDATA("%g %g %g %g", (double)lT[0], (double)lT[1], (double)lT[2], 1.0);
-		mmhwriter->EndElement();
-	}
-	{
-		mmhwriter->StartElement("Rotation");
-		mmhwriter->WriteFormatCDATA("%g %g %g %g", (double)q[0], (double)q[1], (double)q[2], (double)q[3]);
-		mmhwriter->EndElement();
-	}
-
-	for( int i = 0; i < lNode->GetChildCount(); i++)
-	{
-		ExportObject(lNode->GetChild(i));
-	}
-
-	mmhwriter->EndElement(); // Node
+	StartExportNode(lNode, NULL);
+	ExportNodeTransform(lNode);
+	EndExportNode(lNode);
 }
 
 Text MMHExportImpl::GetDiffuseMaterialName(KFbxLayerContainer* lLayerContainer)
@@ -617,7 +525,16 @@ typedef vector<SkinWeightList> BoneWeightList;
 void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 {
 	TCHAR buffer[32];
+	if (pMesh == NULL) return;
 	KFbxNode* lNode = pMesh->GetNode();
+
+	bool exportNode = ( lNode->GetChildCount() > 0 );
+	if (lNode->GetChildCount() > 0)
+	{
+		StartExportNode(lNode, NULL);
+		ExportNodeTransform(lNode);
+	}
+
 	if (name == NULL || name[0] == 0) name = pMesh->GetName();
 	if ((name == NULL || name[0] == 0) && lNode != NULL) name = lNode->GetName();
 	if (name == NULL || name[0] == 0)
@@ -628,17 +545,34 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 
 	if (!allowSharedVertices)
 	{
-		pMesh->SplitPoints();
 		pMesh->ComputeVertexNormals();
+		if (HasSharedVertices(pMesh))
+		{
+			try
+			{
+				KFbxLog::LogDebug("Splitting mesh '%s'", name);
+				pMesh->SplitPoints();
+			}
+			catch (...)
+			{
+				KFbxLog::LogWarn("Splitting mesh '%s' failed.  Trying alternate algorithm.", name);
+				RecomputeMeshVertices(pMesh);
+			}
+		}
 		if (NeedTangentSpace(pMesh))
-			UpdateTangentSpace(pMesh);
-		//RecomputeMeshVertices(pMesh);
+		{
+			KFbxLog::LogVerbose("Updating Tangent Space for '%s'", name);
+			UpdateTangentSpace(pMesh);		
+		}
 	}
 	else
 	{
 		pMesh->ComputeVertexNormals();
 		if (NeedTangentSpace(pMesh))
-			UpdateTangentSpace(pMesh);
+		{
+			KFbxLog::LogVerbose("Updating Tangent Space for '%s'", name);
+			UpdateTangentSpace(pMesh);		
+		}
 	}
 	
 	pMesh->ComputeBBox();
@@ -646,12 +580,6 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 	fbxDouble3 bmax = pMesh->BBoxMax.Get();
 	fbxDouble3 bdim = CalcDim(bmin, bmax);
 	fbxDouble3 bmid = CalcMid(bmin, bmax);
-
-	KFbxVector4 lT, lR, lS;
-	lNode->GetDefaultT(lT);
-	lNode->GetDefaultR(lR);
-	lNode->GetDefaultS(lS);
-	KFbxQuaternion q = ComposeSphericalXYZ(lR);
 
 	// Calculate 
 	Text istr, wstr, busedStr;
@@ -746,20 +674,10 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 			mmhwriter->WriteAttribute( "SourceName", "BaseLight" );
 			mmhwriter->EndElement();
 		}
-		{
-			mmhwriter->StartElement("Translation");
-			Text value = FormatText("%g %g %g %g", (double)lT[0], (double)lT[1], (double)lT[2], (double)lT[3]);
-			value.Trim();
-			mmhwriter->WriteCDATA( value );
-			mmhwriter->EndElement();
-		}
-		{
-			mmhwriter->StartElement("Rotation");
-			Text value = FormatText("%g %g %g %g", (double)q[0], (double)q[1], (double)q[2], (double)q[3]);
-			value.Trim();
-			mmhwriter->WriteCDATA( value );
-			mmhwriter->EndElement();
-		}
+
+		if (!exportNode)
+			ExportNodeTransform(lNode);
+
 		mmhwriter->EndElement();
 	}
 
@@ -795,15 +713,6 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 		mshwriter->WriteFormatAttribute("ElementCount", "%d", lVertexCount);
 		mshwriter->WriteAttribute("Semantic", "TEXCOORD");
 		mshwriter->WriteAttribute("Type", "Float2");
-
-		//if (lMappingMode == KFbxLayerElement::eBY_POLYGON_VERTEX)
-		//{
-		//	lCurrentUVIndex = pMesh->GetTextureUVIndex(lPolygonIndex, lVerticeIndex);
-		//}
-		//else // KFbxLayerElement::eBY_CONTROL_POINT
-		//{
-		//	lCurrentUVIndex = pMesh->GetPolygonVertex(lPolygonIndex, lVerticeIndex);
-		//}
 
 		Text sstr;
 		for (int iVertex=0; iVertex < lVertexCount; ++iVertex) {
@@ -907,6 +816,8 @@ void MMHExportImpl::ExportMesh( KFbxMesh* pMesh, LPCSTR name )
 		mshwriter->EndElement(); // Data
 	}
 	mshwriter->EndElement(); // MeshGroup
+
+	if (exportNode) EndExportNode(lNode);
 }
 
 void MMHExportImpl::ExportMaterialObject( KFbxMesh* pMesh, LPCTSTR matName, LPCTSTR texPath )
@@ -1175,16 +1086,14 @@ void MMHExportImpl::UpdateTangentSpace(KFbxMesh *pMesh)
 	}
 }
 
-void MMHExportImpl::RecomputeMeshVertices( KFbxMesh* pMesh )
+bool MMHExportImpl::HasSharedVertices( KFbxMesh* pMesh )
 {
 	int lVertexCount = pMesh->GetControlPointsCount();
-	int newVertexCount = 0;
 	std::vector<int> indexCount;
 	indexCount.resize(lVertexCount);
 
 	bool hasSharedVertices = false;
 	int lPolygonCount = pMesh->GetPolygonCount();
-	// Handle Tangents and Binormals
 	for ( int lPolygon = 0; lPolygon < lPolygonCount; ++lPolygon )   // for each face
 	{
 		int lPolySize = pMesh->GetPolygonSize(lPolygon);
@@ -1194,11 +1103,19 @@ void MMHExportImpl::RecomputeMeshVertices( KFbxMesh* pMesh )
 			int cnt = indexCount[idx];
 			hasSharedVertices |= ( cnt > 0 );
 			indexCount[idx] = cnt + 1;
-			++newVertexCount;
 		}
 	}
-	if (!hasSharedVertices)
-		return;
+	return hasSharedVertices;
+}
+
+void MMHExportImpl::RecomputeMeshVertices( KFbxMesh* pMesh )
+{
+	int lVertexCount = pMesh->GetControlPointsCount();
+	int newVertexCount = 0;
+	int lPolygonCount = pMesh->GetPolygonCount();
+	// Handle Tangents and Binormals
+	for ( int lPolygon = 0; lPolygon < lPolygonCount; ++lPolygon )   // for each face
+		newVertexCount += pMesh->GetPolygonSize(lPolygon);
 
 	KFbxLayerElementArrayTemplate<KFbxVector4> verts(EFbxType::eDOUBLE4);
 	KFbxLayerElementArrayTemplate<KFbxVector4> norms(EFbxType::eDOUBLE4);
@@ -1293,4 +1210,220 @@ void MMHExportImpl::RecomputeMeshVertices( KFbxMesh* pMesh )
 	//pMesh->ComputeVertexNormals();
 	pMesh->ComputeVertexNormals();
 	UpdateTangentSpace(pMesh);
+}
+
+void MMHExportImpl::StartExportNode( KFbxNode* lNode, LPCTSTR name /*= NULL*/ )
+{
+	TCHAR buffer[32];
+	if (name == NULL) name = lNode->GetName();
+	if (name == NULL || name[0] == 0)
+	{
+		sprintf(buffer, "Node%02d", nodeId++);
+		name = buffer;
+	}
+	mmhwriter->StartElement("Node");
+	mmhwriter->WriteAttribute("Name", name);
+	//mmhwriter->WriteAttribute("SoundMaterialType", "0");
+
+	mmhwriter->StartElement("Export");
+	mmhwriter->WriteFormatAttribute("TagName", "%sTranslation", name);
+	mmhwriter->WriteFormatAttribute("ExportName", "%s_%sTranslation", name, name);
+	mmhwriter->WriteFormatAttribute("ControllerType", "%s_Vector3", name);
+	mmhwriter->EndElement();
+
+	mmhwriter->StartElement("Export");
+	mmhwriter->WriteFormatAttribute("TagName", "%sRotation", name);
+	mmhwriter->WriteFormatAttribute("ExportName", "%s_%sRotation", name, name);
+	mmhwriter->WriteFormatAttribute("ControllerType", "%s_Quaternion", name);
+	mmhwriter->EndElement();
+}
+
+void MMHExportImpl::EndExportNode( KFbxNode* lNode )
+{
+	for( int i = 0; i < lNode->GetChildCount(); i++)
+	{
+		ExportObject(lNode->GetChild(i));
+	}
+	mmhwriter->EndElement(); // Node
+}
+
+void MMHExportImpl::ExportNodeTransform( KFbxNode* lNode, bool global )
+{
+	{
+		KFbxVector4 lT, lR, lS;
+		double scl = 1.0;
+		if (global)
+		{
+			KFbxXMatrix m = lNode->GetGlobalFromDefaultTake();
+			lT = m.GetT(), lR = m.GetR(), lS = m.GetS();
+			scl = (double)Average(lS);
+			if (lS[0] != lS[1] || lS[0] != lS[2]) {
+				KFbxLog::LogWarn("Node '%s' has non-uniform scale.  This is not supported at this time.", lNode->GetName() );
+				scl = 1.0;
+			}
+		}
+		else
+		{
+			lT = lNode->GetLocalTFromDefaultTake();
+			lR = lNode->GetLocalRFromDefaultTake();
+			lS = lNode->GetLocalSFromDefaultTake();
+			scl = (double)Average(lS);
+			if (lS[0] != lS[1] || lS[0] != lS[2]) {
+				KFbxLog::LogWarn("Node '%s' has non-uniform scale.  This is not supported at this time.", lNode->GetName() );
+				scl = 1.0;
+			}
+		}
+		KFbxQuaternion q = ComposeSphericalXYZ(lR);
+		{
+			mmhwriter->StartElement("Translation");
+			Text value = FormatText("%g %g %g %g", (double)lT[0], (double)lT[1], (double)lT[2], (double)lT[3]);
+			value.Trim();
+			mmhwriter->WriteCDATA( value );
+			mmhwriter->EndElement();
+		}
+		{
+			mmhwriter->StartElement("Rotation");
+			Text value = FormatText("%g %g %g %g", (double)q[0], (double)q[1], (double)q[2], (double)q[3]);
+			value.Trim();
+			mmhwriter->WriteCDATA( value );
+			mmhwriter->EndElement();
+		}
+		if ( scl != 1.0 )
+		{
+			mmhwriter->StartElement("Scale");
+			Text value = FormatText("%g", scl);
+			value.Trim();
+			mmhwriter->WriteCDATA( value );
+			mmhwriter->EndElement();
+		}
+	}
+}
+
+
+void MMHExportImpl::RescaleMesh( KFbxMesh* pMesh, KFbxXMatrix & lm )
+{
+	int lVertexCount = pMesh->GetControlPointsCount();
+	KFbxNode* lNode = pMesh->GetNode();
+
+	KFbxVector4 lT = lNode->GetLocalTFromDefaultTake();
+	KFbxVector4 lR = lNode->GetLocalRFromDefaultTake();
+	KFbxVector4 lS = lNode->GetLocalSFromDefaultTake();
+	
+	KFbxXMatrix m;
+	m.SetTRS(lT, lR, lS);
+	m *= lm;
+
+	if (lS[0] != lS[1] || lS[0] != lS[2] || lS[0] != lS[1]) {
+		KFbxLog::LogWarn("Node '%s' has non-uniform scale.  Scale will be collapsed into mesh.", lNode->GetName() );
+		
+		//KFbxXMatrix m;
+		//m.SetS(lS);
+		//m = m.Inverse();
+
+		KFbxVector4* pVerts = pMesh->GetControlPoints();
+		for (int i=0;i<lVertexCount; ++i) {
+			KFbxXMatrix v;
+			v.SetT(pVerts[i]);
+			v = m * v;
+			pVerts[i] = v.GetT();
+			//pVerts[i] = m.MultS(pVerts[i]);
+		}
+
+		//KFbxLayer* lLayer = pMesh->GetLayer(0);
+		//KFbxLayerElementNormal* pNormLayer = pMesh->GetLayer(0)->GetNormals();
+		//if (pNormLayer != NULL)
+		//{
+		//	KFbxLayerElementArrayTemplate<KFbxVector4>& aNorms = pNormLayer->GetDirectArray();
+		//	for (int i=0;i<lVertexCount; ++i)
+		//	{
+		//		KFbxVector4 n = aNorms[i];
+		//		n = m.MultS(n);
+		//		n.Normalize();
+		//		aNorms.SetAt(i, n);
+		//	}
+		//}
+
+		//KFbxVector4 lT = lNode->GetLocalTFromDefaultTake();
+		//KFbxVector4 lR = lNode->GetLocalRFromDefaultTake();
+		//lS[0] = lS[1] = lS[2] = 1.0;
+		//lNode->SetLocalState(lT, lR, lS);
+		lNode->SetLocalState(KFbxVector4(), KFbxVector4(), KFbxVector4(1, 1, 1));
+	}
+
+	for( int i = 0; i < lNode->GetChildCount(); i++)
+	{
+		KFbxNode *lChild = lNode->GetChild(i);
+
+		KFbxVector4 lCT = lChild->GetLocalTFromDefaultTake();
+		KFbxVector4 lCR = lChild->GetLocalRFromDefaultTake();
+		KFbxVector4 lCS = lChild->GetLocalSFromDefaultTake();
+
+		KFbxXMatrix cm;
+		cm.SetTRS(lCT, lCR, lCS);
+		cm = lm * cm;
+
+		lChild->SetLocalState(cm.GetT(), cm.GetR(), cm.GetS());
+	}
+
+}
+
+void MMHExportImpl::CollapseTransforms( KFbxNode* lNode, KFbxXMatrix lm )
+{
+	KFbxVector4 lT = lNode->GetLocalTFromDefaultTake();
+	KFbxVector4 lR = lNode->GetLocalRFromDefaultTake();
+	KFbxVector4 lS = lNode->GetLocalSFromDefaultTake();
+
+	KFbxXMatrix wm = lNode->GetGlobalFromDefaultTake();
+
+	KFbxXMatrix m;
+	//m.SetTRS(lT, lR, lS);
+	//m = lm * m;
+	m = wm;
+
+	for( int i = 0; i < lNode->GetChildCount(); i++)
+	{
+		KFbxNode *lChild = lNode->GetChild(i);
+
+		LPCTSTR cname = lChild->GetName();
+		if ( KFbxNodeAttribute *pAttr = lChild->GetNodeAttribute() )
+		{
+			KFbxNodeAttribute::EAttributeType lAttributeType = pAttr->GetAttributeType();
+			switch (lAttributeType)
+			{
+			case KFbxNodeAttribute::eMESH:
+				if ( KFbxMesh* pMesh = (KFbxMesh*)pAttr )
+				{
+					if (!pMesh->IsTriangleMesh())
+					{
+						KFbxLog::LogInfo("Mesh '%s' is not a triangle mesh.  Triangulating...", cname );
+						KFbxGeometryConverter lConverter(mManager);
+						lConverter.TriangulateInPlace(lChild);
+					}
+					RescaleMesh((KFbxMesh*)lChild->GetNodeAttribute(), m);
+				}
+				break;
+
+			case KFbxNodeAttribute::eNURB:					
+				KFbxLog::LogWarn("NURB is not directly supported and will be triangulated. Exporting Mesh '%s'", cname );  
+				{
+					KFbxGeometryConverter lConverter(mManager);
+					lConverter.TriangulateInPlace(lChild);
+					RescaleMesh((KFbxMesh*)lChild->GetNodeAttribute(), m);
+				}
+				break;
+
+			case KFbxNodeAttribute::ePATCH:
+				KFbxLog::LogWarn("PATCH is not directly supported and will be triangulated. Exporting Mesh '%s'", cname );  
+				{
+					KFbxGeometryConverter lConverter(mManager);
+					lConverter.TriangulateInPlace(lChild);
+					RescaleMesh((KFbxMesh*)lChild->GetNodeAttribute(), m);
+				}
+				break;
+			}
+		}
+		CollapseTransforms(lChild, m);
+	}
+
+	lNode->SetLocalState(m.GetT(), KFbxVector4(), KFbxVector4(1, 1, 1));
 }
