@@ -130,6 +130,7 @@ struct VPTraits<GFFField>
 {
 	static  GFFField *  create()  { return GFFField::Default(); }
 	static  GFFField *  clone( GFFField const * p )  { return NULL; }
+	static  GFFField *  construct( GFFField const * p )  { return const_cast<GFFField*>(p); }
 	static  GFFField *  release( GFFField * p )  { 
 		if (p) p->destroy();
 		return NULL; 

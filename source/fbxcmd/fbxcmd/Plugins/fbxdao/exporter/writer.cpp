@@ -2,46 +2,19 @@
 #include "fbxdao.h"
 #include <fbxsdk.h>
 #include "../fbxcmn/KFbxLog.h"
+#include "writer.h"
 
 #include <fbxfilesdk/fbxfilesdk_nsuse.h>
 
-class DAOWriter : public KFbxWriter
+
+DAOWriter::DAOWriter( KFbxSdkManager &manager, KFbxExporter &exporter, int SubID, int ID ) 
+	: base(manager, ID)
+	, mManager(&manager)
+	, mExporter(&exporter)
+	, mSubID(SubID)
+	, mID(ID)
 {
-	typedef class KFbxWriter base;
-public:
-	void *operator new(size_t count) {
-		return k_pAllocator->mMallocHandler(count);
-	}
-
-	void operator delete(void* _Ptr) throw( ) {
-		k_pAllocator->mFreeHandler(_Ptr);
-	}
-
-
-	DAOWriter(KFbxSdkManager &manager, KFbxExporter &exporter, int SubID, int ID)
-		: base(manager, ID), mManager(&manager), mExporter(&exporter), mSubID(SubID), mID(ID)
-	{
-	}
-
-	//VERY important to put the file close in the destructor
-	virtual ~DAOWriter() ;
-
-	virtual bool FileCreate(char* pFileName) ;
-	virtual bool FileClose() ;
-	virtual bool IsFileOpen();
-	virtual KFbxStreamOptions* GetWriteOptions() ;
-	virtual bool Write(KFbxDocument* pDocument, KFbxStreamOptions* pStreamOptions) ;
-
-	virtual bool PreprocessScene(KFbxScene &pScene);
-	virtual bool PostprocessScene(KFbxScene &pScene);
-
-private:
-	FILE *mFilePointer;
-	KFbxSdkManager *mManager;
-	KFbxExporter *mExporter;
-	int mSubID;
-	int mID;
-};
+}
 
 DAOWriter::~DAOWriter()
 {
@@ -50,18 +23,19 @@ DAOWriter::~DAOWriter()
 
 bool DAOWriter::FileCreate( char* pFileName )
 {
-	KFbxLog::LogError("Writing MMH and MSH files is not supported yet.");
-	return false;
+	filepath = pFileName;
+	return true;
 }
 
 bool DAOWriter::FileClose()
 {
-	return false;
+	filepath.clear();
+	return true;
 }
 
 bool DAOWriter::IsFileOpen()
 {
-	return false;
+	return (filepath[0] != 0);
 }
 
 KFbxStreamOptions* DAOWriter::GetWriteOptions()
@@ -74,7 +48,38 @@ KFbxStreamOptions* DAOWriter::GetWriteOptions()
 
 bool DAOWriter::Write( KFbxDocument* pDocument, KFbxStreamOptions* pStreamOptions )
 {
-	KFbxLog::LogError("Writing MMH and MSH files is not supported yet.");
+	if (!IsFileOpen())
+	{
+		KFbxLog::LogError("Trying to write to an closed stream");
+		return false;
+	}
+
+	Text filename = PathFindFileName(filepath);
+	LPCTSTR ext = PathFindExtension(filename);
+	if (ext != NULL && _tcsicmp(ext, ".XML") == 0){
+		PathRemoveExtension(filename);
+		ext = PathFindExtension(filename);
+	}
+	if (ext != NULL && _tcsicmp(ext, ".MMH") == 0)
+	{
+		DAOStreamPtr file = DAOStream::Create(filepath, false);
+		if (file.isNull())
+		{
+			KFbxLog::LogError("Could not create file: %s", filepath);
+			return false;
+		}
+		return WriteMMH( pDocument, pStreamOptions, file );
+	}
+	else if (ext != NULL && _tcsicmp(ext, ".MSH") == 0)
+	{
+		KFbxLog::LogError("Writing MMH and MSH files is not supported yet.");
+		return false;
+		//return ReadMESH( pDocument, pStreamOptions, gffFile );
+	}
+	else
+	{
+		KFbxLog::LogError("Unknown filetype '%s'", (LPCTSTR)ext);
+	}
 	return false;
 }
 
@@ -100,13 +105,17 @@ void* GetWriterInfo(KFbxWriter::KInfoRequest pRequest, int pId)
 	{
 		"mmh",
 		"msh",
+		"mmh.xml",
+		"msh.xml",
 		NULL
 	};
 
 	static char const* sDesc[] = 
 	{
-		"Dragon Age: Origins Model Hierarchy (*.mmh)",
-		"Dragon Age: Origins Mesh (*.msh)",
+		"Dragon Age: Origins Model Hierarchy (*.mmh, *.mmh.xml)",
+		"Dragon Age: Origins Mesh (*.msh, *.msh.xml)",
+		"Dragon Age: Origins Model Hierarchy (*.mmh, *.mmh.xml)",
+		"Dragon Age: Origins Mesh (*.msh, *.msh.xml)",
 		0
 	};
 

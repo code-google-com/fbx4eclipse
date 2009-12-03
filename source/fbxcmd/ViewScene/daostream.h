@@ -39,8 +39,8 @@ public:
 	virtual size_t Read(void *buf, size_t size, size_t count = 1) = 0;
 	virtual size_t Write(void const * buf, size_t size, size_t count = 1) = 0;
 	virtual int Seek(int whence, long offset) = 0;
-	virtual int Tell() = 0;
-	virtual int TellEnd() = 0;
+	virtual int Tell() const = 0;
+	virtual int TellEnd() const = 0;
 
 	virtual bool Eof() const = 0;
 
@@ -59,6 +59,12 @@ struct VPTraits<IDAOStream>
 		if (mp) mp->AddRef(); 
 		return mp; 
 	}
+	static  IDAOStream *  construct( IDAOStream const * p )  { 
+		IDAOStream *mp = const_cast<IDAOStream*>(p); 
+		if (mp) mp->AddRef(); 
+		return mp; 
+	}
+
 	static  IDAOStream *  release( IDAOStream * p )  { 
 		if (p && p->Release() == 0)
 			return NULL;
@@ -84,12 +90,12 @@ struct VRTraits<IDAOStream>
 
 class DAOStream : public IDAOStream
 {
-	virtual int AddRef() { return ++refcnt; }
+	virtual int AddRef() { if (refcnt <= 0) return 0; return ++refcnt; }
 	virtual int Release() { if (refcnt <= 0) return 0; if (--refcnt == 0) { delete this; return 0; } return refcnt; }
 public:
 	DAOStream() : fh(NULL), refcnt(0) {}
 
-	DAOStream(const TCHAR *file, bool readonly) : fh(NULL) { 
+	DAOStream(const TCHAR *file, bool readonly) : fh(NULL), refcnt(0) { 
 		Open(file, readonly); 
 	}
 	~DAOStream() { 
@@ -105,8 +111,8 @@ public:
 	virtual size_t Read(void *buf, size_t size, size_t count = 1);
 	virtual size_t Write(void const * buf, size_t size, size_t count = 1);
 	virtual int Seek(int whence, long offset);
-	virtual int Tell();
-	virtual int TellEnd();
+	virtual int Tell() const;
+	virtual int TellEnd() const;
 
 	virtual bool Eof() const;
 
@@ -123,8 +129,8 @@ protected:
 class DAOMemStream : public IDAOStream
 {
 protected:
-	virtual int AddRef() { return ++refcnt; }
-	virtual int Release() { if (refcnt < 0) return 0; if (--refcnt == 0) { delete this; return 0; } return refcnt; }
+	virtual int AddRef() { if (refcnt <= 0) return 0; return ++refcnt; }
+	virtual int Release() { if (refcnt <= 0) return 0; if (--refcnt == 0) { delete this; return 0; } return refcnt; }
 public:
 	DAOMemStream(bool readonly = false);
 
@@ -141,8 +147,8 @@ public:
 	virtual size_t Read(void *buf, size_t size, size_t count = 1);
 	virtual size_t Write(void const * buf, size_t size, size_t count = 1);
 	virtual int Seek(int whence, long offset);
-	virtual int Tell();
-	virtual int TellEnd();
+	virtual int Tell() const;
+	virtual int TellEnd() const;
 	virtual bool Eof() const;
 
 	virtual void Reserve( size_t len );
@@ -171,7 +177,6 @@ protected:
 	virtual int AddRef() { if (refcnt <= 0) return 0; return ++refcnt; }
 	virtual int Release() { if (refcnt <= 0) return 0; if (--refcnt == 0) { delete this; return 0; } return refcnt; }
 
-
 	DAOOffsetStream(DAOStreamPtr& stream, int offset, int size) 
 		: impl(stream), _offset(offset), _size(size), refcnt(0)
 	{
@@ -195,7 +200,7 @@ public:
 		impl->Seek(SEEK_SET, offset);
 	}
 
-	static DAOStreamPtr Create(DAOStreamPtr stream, int offset = -1, int size = -1);	
+	static DAOStreamPtr Create(DAOStreamPtr& stream, int offset = -1, int size = -1);	
 
 
 	virtual void Close() { }
@@ -215,9 +220,9 @@ public:
 			return impl->Seek(whence, offset ) - _offset;
 		}		
 	}
-	virtual int Tell()			{ return impl->Tell() - _offset; }
-	virtual int TellEnd()		{ return impl->TellEnd() - _offset; }
-	virtual bool Eof() const	{ return impl->Tell() >= _size; }
+	virtual int Tell()	const	{ return impl->Tell() - _offset; }
+	virtual int TellEnd() const	{ return _size; }
+	virtual bool Eof() const	{ return Tell() >= _size; }
 	virtual void *get_pdata()	{ return impl->get_pdata(); }
 	virtual void set_pdata(const void* value) { impl->set_pdata(value); }
 };
@@ -242,7 +247,7 @@ class DAODumpStream : public IDAODumpStream
 	int IndentLevel;
 	int refcnt;
 protected:
-	virtual int AddRef() { return ++refcnt; }
+	virtual int AddRef() { if (refcnt <= 0) return 0; return ++refcnt; }
 	virtual int Release() { if (refcnt <= 0) return 0; if (--refcnt == 0) { delete this; return 0; } return refcnt; }
 public:
 	DAODumpStream() : impl(), IndentLevel(0), refcnt(0) {}
@@ -268,8 +273,8 @@ public:
 	virtual size_t Read(void *buf, size_t size, size_t count = 1);
 	virtual size_t Write(void const * buf, size_t size, size_t count = 1);
 	virtual int Seek(int whence, long offset);
-	virtual int Tell();
-	virtual int TellEnd();
+	virtual int Tell() const;
+	virtual int TellEnd() const;
 	virtual bool Eof() const;
 	virtual void *get_pdata();
 	virtual void set_pdata(const void* value);

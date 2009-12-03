@@ -441,6 +441,7 @@ static bool ExecuteCmd(Program &prog)
 		_splitpath(infile.c_str(), drive, dir, fname, ext);
 		strcat(fname, "-out");
 		_makepath(path, drive, dir, fname, ".fbx");
+		GetFullPathName(path, _countof(path), path, NULL);
 		outfile = path;
 	}
 

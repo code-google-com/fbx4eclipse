@@ -27,6 +27,7 @@ template< class T >
 struct VPTraits  {
 	static  T *  create()  { return new T(); }
 	static  T *  clone( T const * p )  { return new T( *p ); }
+	static  T *  construct( T const * p )  { return const_cast<T*>(p); }
 	static  T *  release( T * p )  { delete(p); return NULL; }
 };  // VPTraits
 
@@ -42,7 +43,7 @@ public:
 	// Default constructor/destructor:
 	// --------------------------------------------------
 	explicit ValuePtr( ) : myP ( VPTraits<T>::create() ) { ; }
-	explicit ValuePtr( T * p ) : myP( p )  { ; }
+	explicit ValuePtr( T * p ) { myP = VPTraits<T>::construct(p); }
 	~ValuePtr()  { myP = VPTraits<T>::release(myP); }
 
 	// --------------------------------------------------

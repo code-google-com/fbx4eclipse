@@ -1,6 +1,9 @@
 #include "KFbxLog.h"
 #include <malloc.h>
 #include <list>
+#include <crtdbg.h>
+
+extern "C" int __stdcall IsDebuggerPresent( );
 
 static std::list<ILogListenerA*> listenersA;
 static std::list<ILogListenerW*> listenersW;
@@ -100,6 +103,11 @@ bool KFbxLog::IsVerboseEnabled()
 	return logEnabled && logLevel <= LOG_VERBOSE && (!listenersA.empty() || !listenersW.empty());
 }
 
+bool KFbxLog::IsEnabled(KFbxLogLevel level)
+{
+	return logEnabled && logLevel <= level && (!listenersA.empty() || !listenersW.empty());
+}
+
 void KFbxLog::LogError( const char* format, ... )
 {
 	if (!IsErrorEnabled()) return;
@@ -147,10 +155,10 @@ void KFbxLog::LogVerbose( const char* format, ... )
 
 void KFbxLog::LogMsg( KFbxLogLevel level, const char* format, ... )
 {
-	if (!IsVerboseEnabled()) return;
+	if (!IsEnabled(level)) return;
 	va_list args;
 	va_start(args, format);
-	LogMsgV(LOG_VERBOSE, format, args);
+	LogMsgV(level, format, args);
 	va_end(args);
 }
 
@@ -215,7 +223,7 @@ void KFbxLog::LogVerbose( const wchar_t* format, ... )
 
 void KFbxLog::LogMsg( KFbxLogLevel level, const wchar_t* format, ... )
 {
-	if (!IsVerboseEnabled()) return;
+	if (!IsEnabled(level)) return;
 	va_list args;
 	va_start(args, format);
 	LogMsgV(LOG_VERBOSE, format, args);
@@ -256,3 +264,18 @@ void KFbxLog::RemoveListener( ILogListenerW* pListener )
 	listenersW.remove(pListener);
 }
 
+void KFbxLog::AssertFailed(  KFbxLogLevel level
+					  , const char *pFileName
+					  , const char *pFunctionName
+					  , unsigned long pLineNumber
+					  , const char *pMessage
+					  , bool *pHideForEver)
+{
+	if ( KFbxLog::IsEnabled(level) )
+	{
+		if (pHideForEver) *pHideForEver = true;
+		KFbxLog::LogMsg(level, "%s(%u): %s: %s", pFileName, pLineNumber, pFunctionName, pMessage);
+		if (IsDebuggerPresent()) 
+			_CrtDbgBreak();
+	}
+}

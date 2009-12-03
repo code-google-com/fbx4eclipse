@@ -62,10 +62,9 @@ bool FindMatchingFiles( LPCTSTR match, _tstringlist& result )
 		strcpy(path, match);
 		PathRemoveFileSpec(path);
 
-		bool ok = false;
 		HANDLE hFind = FindFirstFile(match, &FindFileData);
 		if (hFind != INVALID_HANDLE_VALUE) {
-			for (BOOL ok = TRUE ; ok ; ok = FindNextFile(hFind, &FindFileData)) {
+			for (BOOL next = TRUE ; next ; next = FindNextFile(hFind, &FindFileData)) {
 				PathCombine(filebuf, path, FindFileData.cFileName);
 				GetFullPathName(filebuf, _countof(resultbuf), resultbuf, NULL);
 				result.push_back(_tstring(resultbuf));
@@ -441,11 +440,12 @@ struct ResourceResolver
 							//KFbxLog::LogVerbose("ERF File list could not be read: %s", erfFileName.c_str() );
 							continue;
 						}
-						FileReferenceRange range = std::equal_range(refs.begin(), refs.end(), filePart, FileReferenceEquivalence() );
-						if (range.first != range.second)
+						for ( FileReferenceIterator fitr = refs.begin(), fend = refs.end(); fitr != fend; ++fitr)
 						{
-							const FileReference& fref = *range.first;
-							return DAOStreamPtr( DAOOffsetStream::Create(erfstream, fref.offset, fref.length));
+							const FileReference& fref = *fitr;
+							if ( wcsicmp(fref.filename, filePart) == 0) {
+								return DAOStreamPtr( DAOOffsetStream::Create(erfstream, fref.offset, fref.length));
+							}
 						}
 					}
 				}

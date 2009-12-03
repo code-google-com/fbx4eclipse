@@ -1,0 +1,19 @@
+             tazpn's DAO Tools 1.2
+             =====================
+
+Change log
+----------
+
+1.2
+-----   
+ - Fix import of MSH files that have a non-zero position or rotation
+ - Support looking up MMH file directly from ERFs
+
+1.1
+-----   
+ - Memory leak fixes
+ - Fixed some issues where the tool was not reading from the ERF files
+
+1.0
+-----   
+ - Initial Release

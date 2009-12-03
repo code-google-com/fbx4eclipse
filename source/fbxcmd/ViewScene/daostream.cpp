@@ -76,12 +76,12 @@ int DAOStream::Seek(int whence, long offset)
 	return fseek(fh, offset, whence);
 }
 
-int DAOStream::Tell()
+int DAOStream::Tell() const
 {
 	return ftell(fh);
 }
 
-int DAOStream::TellEnd()
+int DAOStream::TellEnd() const
 {
 	struct _stat data;
 	memset(&data, 0, sizeof(data));
@@ -182,8 +182,8 @@ void DAODumpStream::Close() { impl.Close(); }
 size_t DAODumpStream::Read(void *buf, size_t size, size_t count ){ return impl.Read(buf, size, count); }
 size_t DAODumpStream::Write(void const * buf, size_t size, size_t count ) { return impl.Write(buf, size, count); }
 int DAODumpStream::Seek(int whence, long offset) { return impl.Seek(whence, offset); }
-int DAODumpStream::Tell() { return impl.Tell(); }
-int DAODumpStream::TellEnd() { return impl.TellEnd(); }
+int DAODumpStream::Tell() const { return impl.Tell(); }
+int DAODumpStream::TellEnd() const { return impl.TellEnd(); }
 bool DAODumpStream::Eof() const { return impl.Eof(); }
 void *DAODumpStream::get_pdata() { return impl.get_pdata(); }
 void DAODumpStream::set_pdata(const void* value) { impl.set_pdata(value); }
@@ -266,8 +266,8 @@ int DAOMemStream::Seek( int whence, long offset )
 	return o = std::max<size_t>( std::min<size_t>( o, n ), 0 );
 }
 
-int DAOMemStream::Tell() { return o; }
-int DAOMemStream::TellEnd() { return n; }
+int DAOMemStream::Tell() const { return o; }
+int DAOMemStream::TellEnd() const { return n; }
 bool DAOMemStream::Eof() const { return o == n; }
 
 void DAOMemStream::Reserve( size_t len )
@@ -297,7 +297,7 @@ DAOStreamPtr DAOMemStream::Create( const void* data, int len )
 	return DAOStreamPtr(ptr);	
 }
 
-DAOStreamPtr DAOOffsetStream::Create( DAOStreamPtr stream, int offset /*= -1*/, int size /*= -1*/ )
+DAOStreamPtr DAOOffsetStream::Create( DAOStreamPtr& stream, int offset /*= -1*/, int size /*= -1*/ )
 {
 	DAOOffsetStream *ptr = new DAOOffsetStream(stream, offset, size);
 	++ptr->refcnt;

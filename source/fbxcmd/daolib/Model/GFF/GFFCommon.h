@@ -147,7 +147,6 @@ unsigned int SizeOf(IDAOStream& in, ValueRef<T> const & val) {
 	return (val.isNull()) ? 0 : sizeof(T);
 }
 
-
 #pragma endregion
 ROOTVARTYPE(Text);
 
