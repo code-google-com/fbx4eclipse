@@ -30,6 +30,7 @@
 #include "dds/DirectDrawSurface.h"
 #include "daostream.h"
 #include "ResourceManager.h"
+#include "../fbxcmd/Plugins/fbxcmn/KFbxLog.h"
 
 typedef char int8;
 typedef short int16;
@@ -88,7 +89,7 @@ public:
 		{
 			fh = fopen(file, readonly ? "rbS" : "wbS");
 			if (!fh) {
-				//lError.SetLastError( 1, FormatString("Unable to open file: %s", file) );
+				KFbxLog::LogError( "Unable to open file: %s", file );
 				return false;
 			}
 			setvbuf(fh, NULL, _IOFBF, 0x8000);
@@ -112,7 +113,7 @@ public:
 		{
 			fh = _wfopen(file, readonly ? L"rbS" : L"wbS");
 			if (!fh) {
-				lError.SetLastError( 1, FormatString("Unable to open file: %s", file) );
+				KFbxLog::LogError( "Unable to open file: %s", file);
 				return false;
 			}
 			setvbuf(fh, NULL, _IOFBF, 0x8000);
@@ -235,7 +236,7 @@ static bool loadTargaFile( const KString & lFileName, VSTexture * lTexture, KErr
 	}
 	else
 	{
-		lError.SetLastError(errcode, tga_error(errcode) );
+		//lError.SetLastError(errcode, tga_error(errcode) );
 
 		return false;
 	}
@@ -371,7 +372,7 @@ int texLoadRaw( IDAOStream & f, VSTexture * lTexture
 	lError.ClearLastError();
 
 	if ( bytespp * 8 != bpp || bpp > 32 || bpp < 8 ) {
-		lError.SetLastError( 1, FormatString( "unsupported image depth %d / %d", bpp, bytespp ) );
+		KFbxLog::LogError( "unsupported image depth %d / %d", bpp, bytespp );
 		return 0;
 	}
 
@@ -394,12 +395,12 @@ int texLoadRaw( IDAOStream & f, VSTexture * lTexture
 		{
 			if ( ! uncompressRLE( f, w, h, bytespp, data1 ) )
 			{
-				lError.SetLastError(1,"unexpected EOF" );
+				//lError.SetLastError(1,"unexpected EOF" );
 			}
 		}
 		else if ( f.Read( (char *) data1, w * h * bytespp ) != w * h * bytespp )
 		{
-			lError.SetLastError(1,"unexpected EOF" );
+			//lError.SetLastError(1,"unexpected EOF" );
 		}
 
 		if ( -1 == lError.GetLastErrorID())
@@ -432,7 +433,8 @@ int texLoadPal( IDAOStream & f, VSTexture * lTexture
 	lError.ClearLastError();
 	if ( bpp != 8 || bytespp != 1 )
 	{
-		lError.SetLastError( 1, FormatString( "unsupported image depth %d / %d", bpp, bytespp ) );
+		
+		KFbxLog::LogError( "unsupported image depth %d / %d", bpp, bytespp );
 		return 0;
 	}
 
@@ -456,12 +458,12 @@ int texLoadPal( IDAOStream & f, VSTexture * lTexture
 		{
 			if ( ! uncompressRLE( f, w, h, bytespp, data ) )
 			{
-				lError.SetLastError( 1, FormatString( "unsupported image depth %d / %d", bpp, bytespp ) );
+				KFbxLog::LogError( "unsupported image depth %d / %d", bpp, bytespp );
 			}
 		}
 		else if ( f.Read( (char *) data, w * h * bytespp ) != w * h * bytespp )
 		{
-			lError.SetLastError( 1, FormatString( "unsupported image depth %d / %d", bpp, bytespp ) );
+			KFbxLog::LogError("unsupported image depth %d / %d", bpp, bytespp );
 		}
 
 		if ( -1 == lError.GetLastErrorID())
@@ -730,7 +732,7 @@ GLuint texLoadDDS( IDAOStream & f, KString & texformat, VSTexture * lTexture, KE
 
 	if ( strncmp( tag,"DDS ", 4 ) != 0 || f.Read((char *) &ddsHeader, sizeof(DDSFormat), 1) != 1 )
 	{
-		lError.SetLastError( 1, "not a DDS file" );
+		KFbxLog::LogError( "not a DDS file" );
 		return 0;
 	}
 
@@ -741,7 +743,7 @@ GLuint texLoadDDS( IDAOStream & f, KString & texformat, VSTexture * lTexture, KE
 
 	if ( ! ( isPowerOfTwo( ddsHeader.dwWidth ) && isPowerOfTwo( ddsHeader.dwHeight ) ) )
 	{
-		lError.SetLastError( 1, "image dimensions must be power of two" );
+		KFbxLog::LogError("image dimensions must be power of two" );
 		return 0;
 	}
 
@@ -770,7 +772,7 @@ GLuint texLoadDDS( IDAOStream & f, KString & texformat, VSTexture * lTexture, KE
 			texformat += " (DXT5)";
 			break;
 		default:
-			lError.SetLastError( 1, "unknown texture compression" );
+			KFbxLog::LogError( "unknown texture compression" );
 			return 0;
 		}
 
@@ -811,14 +813,12 @@ GLuint texLoadDDS( IDAOStream & f, KString & texformat, VSTexture * lTexture, KE
 extern bool LoadTexture( const KString & lFileName, VSTexture * lTexture, KError & lError )
 {
 	_tstring fname = ResourceManager::FindFile( _tstring(lFileName) );
-
-
-	KString lExt = lFileName.Right(4).Lower();
-	if (lExt == ".tga")
+	_tstring lExt = fname.substr(fname.size()-4);
+	if (_tcsicmp(lExt.c_str(), ".tga") == 0)
 	{
 		return loadTargaFile(lFileName, lTexture, lError);
 	}
-	else if (lExt == ".dds")
+	else if (_tcsicmp(lExt.c_str(), ".dds") == 0)
 	{
 		DAOStreamPtr stream = ResourceManager::OpenStream( lFileName );
 		if (!stream.isNull() )
@@ -826,9 +826,26 @@ extern bool LoadTexture( const KString & lFileName, VSTexture * lTexture, KError
 			KString format;
 			return texLoadDDS( *stream, format, lTexture, lError ) > 0;
 		}
+		KFbxLog::LogWarn( "File could not found: %s", lFileName.Buffer() );
 		return false;
 	}
-	lError.SetLastError(1, "Unknown file extension" );
+	else
+	{
+		fname.erase( fname.size()-4 );
+		fname.append(".dds");
+
+		DAOStreamPtr stream = ResourceManager::OpenStream( fname.c_str() );
+		if (!stream.isNull() )
+		{
+			KString format;
+			return texLoadDDS( *stream, format, lTexture, lError ) > 0;
+		}
+		KFbxLog::LogWarn( "File could not found: %s", lFileName.Buffer() );
+		return false;
+	}
+
+
+	KFbxLog::LogError( "Unknown file extension" );
 	return false;
 }
 

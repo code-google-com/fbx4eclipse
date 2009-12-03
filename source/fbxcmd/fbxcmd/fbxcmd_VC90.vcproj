@@ -414,6 +414,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Core\resource.h"
+			>
+		</File>
+		<File
 			RelativePath=".\Core\resource.hc"
 			>
 		</File>

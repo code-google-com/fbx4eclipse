@@ -1,4 +1,4 @@
-             tazpn's DAO Tools 1.2
+             tazpn's DAO Tools 1.3
              =====================
 
     This packages includes an command line application for
@@ -21,9 +21,9 @@
 Quick Start:
   1. Use daocmd.exe or ErfEditor.exe to unpack ERF and RIM files in 
        Dragon Age\packages\core\data
-    > daocmd erf "%ProgramFiles%\Dragon Age\packages\core\data\modelhierarchies.erf"
-    > daocmd erf "%ProgramFiles%\Dragon Age\packages\core\data\textures.erf"
-    > daocmd erf "%ProgramFiles%\Dragon Age\packages\core\textures\high\texturepack.erf"
+    > daocmd erf "%ProgramFiles%\Electronic Arts\Dragon Age Origins\packages\core\data\modelhierarchies.erf"
+    > daocmd erf "%ProgramFiles%\Electronic Arts\Dragon Age Origins\packages\core\data\textures.erf"
+    > daocmd erf "%ProgramFiles%\Electronic Arts\Dragon Age Origins\packages\core\textures\high\texturepack.erf"
     
   2. Convert MMH to FBX 
     > fbxcmd Convert c_berkbeara_0.mmh "%TEMP%\c_berkbeara_0.fbx"
@@ -42,6 +42,13 @@ Quick Start:
     > viewscene "%TEMP%\c_berkbeara_0.fbx"
     > viewscene "%TEMP%\c_berkbeara_0.dae"
 
+  7. Convert FBX to MMH.XML
+    > fbxcmd convert c_berkbeara_0.fbx c_berkbeara_0.mmh.xml
+    
+  8. Compile MMH.XML to MMH and MSH.XML to MSH
+    > "%ProgramFiles%\Electronic Arts\Dragon Age Origins\tools\ResourceBuild\Processors\MMH\GraphicsProcessorMMH.exe" c_berkbeara_0.mmh.xml
+    > "%ProgramFiles%\Electronic Arts\Dragon Age Origins\tools\ResourceBuild\Processors\MSH\GraphicsProcessorMSH.exe" -platform pc mmdtogff c_berkbeara_0.msh.xml
+    
 TODO:
   - Convert from FBX to DAO compatable (MMH or MMH.XML files)
   - Support physics models

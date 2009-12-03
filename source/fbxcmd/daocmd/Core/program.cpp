@@ -304,7 +304,7 @@ Program::Program(int argc, TCHAR **argv, bool zeroargs)
 	if (!infile.empty() && outfile.empty()) {
 		TCHAR path[MAX_PATH], drive[MAX_PATH], dir[MAX_PATH], fname[MAX_PATH], ext[MAX_PATH];
 		_tsplitpath(infile.c_str(), drive, dir, fname, ext);
-		_tcscat(fname, _T("-out"));
+		_tcscat(fname, _T("_out"));
 		_tmakepath(path, drive, dir, fname, ext);
 		outfile = path;
 	}

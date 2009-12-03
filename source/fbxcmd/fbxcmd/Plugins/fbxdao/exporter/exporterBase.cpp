@@ -16,11 +16,11 @@ HISTORY:
 using namespace DAO;
 using namespace DAO::GFF;
 
-ExporterBase::ExporterBase( DAOWriter *owner, KFbxScene* scene, KFbxStreamOptions* options, DAOStreamPtr file ) 
+ExporterBase::ExporterBase( DAOWriter *owner, KFbxScene* scene, KFbxStreamOptions* options, LPCSTR filename ) 
 	: o(owner)
 	, lScene(scene)
 	, pStreamOptions(options)
 	, mManager(owner->mManager)
-	, pFile(file)
 {
+	this->filename = filename;
 }

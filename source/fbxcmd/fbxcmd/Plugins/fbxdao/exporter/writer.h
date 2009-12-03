@@ -34,7 +34,7 @@ public:
 	virtual bool PostprocessScene(KFbxScene &pScene);
 
 	// Implementation
-	bool WriteMMH( KFbxDocument* pDocument, KFbxStreamOptions* pStreamOptions, DAOStreamPtr file );
+	bool WriteMMH( KFbxDocument* pDocument, KFbxStreamOptions* pStreamOptions, LPCTSTR fname );
 
 public:
 	KFbxSdkManager *mManager;

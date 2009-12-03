@@ -62,13 +62,7 @@ bool DAOWriter::Write( KFbxDocument* pDocument, KFbxStreamOptions* pStreamOption
 	}
 	if (ext != NULL && _tcsicmp(ext, ".MMH") == 0)
 	{
-		DAOStreamPtr file = DAOStream::Create(filepath, false);
-		if (file.isNull())
-		{
-			KFbxLog::LogError("Could not create file: %s", filepath);
-			return false;
-		}
-		return WriteMMH( pDocument, pStreamOptions, file );
+		return WriteMMH( pDocument, pStreamOptions, filename );
 	}
 	else if (ext != NULL && _tcsicmp(ext, ".MSH") == 0)
 	{
