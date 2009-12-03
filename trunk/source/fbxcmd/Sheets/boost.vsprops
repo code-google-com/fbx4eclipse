@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="boost"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		AdditionalIncludeDirectories="$(BOOSTDIR)"
+		PreprocessorDefinitions=""
+	/>
+	<UserMacro
+		Name="BOOSTDIR"
+		Value="$(SolutionDir)Libraries\boost_1_39_0\"
+	/>
+</VisualStudioPropertySheet>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="daolib"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		AdditionalIncludeDirectories="$(ProjectDir)..\daolib\common;$(ProjectDir)..\daolib\model"
+		PreprocessorDefinitions=""
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		AdditionalDependencies="daolib.lib"
+		AdditionalLibraryDirectories="&quot;$(ProjectDir)..\daolib\lib&quot;;&quot;$(SolutionDir)Staging\$(ConfigurationName)&quot;"
+	/>
+</VisualStudioPropertySheet>

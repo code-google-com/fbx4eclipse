@@ -1,0 +1,3 @@
+EXPORTS
+	RegisterFBXPlugins
+	UnregisterFBXPlugins

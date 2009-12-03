@@ -1,0 +1,10 @@
+                  tazpn's DA:O 3ds Max Tools 1.0
+                  ==============================
+
+    Change log
+    ----------
+
+      0.1.0
+      -----   
+    o Importer
+      - First Release

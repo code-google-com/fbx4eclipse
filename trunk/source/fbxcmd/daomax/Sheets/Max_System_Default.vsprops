@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="Max_System_Default"
+  OutputDirectory="$(SolutionDir)Staging\$(PlatformName)\$(ConfigurationName)\"
+  IntermediateDirectory="$(SolutionDir)Temp\$(ProjectName)\$(PlatformName)\$(ConfigurationName)\"
+  UseOfMFC="0"
+  ATLMinimizesCRunTimeLibraryUsage="false"
+  WholeProgramOptimization="0"
+  CharacterSet="2"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+    AdditionalIncludeDirectories="$(MaxSDKDir)\include;&quot;$(ProjectDir)&quot;;&quot;$(ProjectDir)Common&quot;"
+    PreprocessorDefinitions="_WINDOWS;_USRDLL;_USE_MATH_DEFINES;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS"
+    ExceptionHandling="2"
+    EnableFunctionLevelLinking="true"
+    ForceConformanceInForLoopScope="false"
+    WarningLevel="3"
+    SuppressStartupBanner="true"
+    CompileAs="0"
+    AdditionalOptions="/LD /Zm200 /FI&quot;$(ProjectDir)pch.h&quot;"
+    UsePrecompiledHeader="2"
+    PrecompiledHeaderThrough="$(ProjectDir)pch.h"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+    AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib shlwapi.lib core.lib geom.lib gfx.lib mesh.lib maxutil.lib maxscrpt.lib paramblk2.lib bmm.lib mnmath.lib"
+    SuppressStartupBanner="true"
+    ModuleDefinitionFile="$(ProjectDir)$(ProjectName).def"
+    SubSystem="2"
+    BaseAddress="0x16860000"
+    OutputFile="$(MaxPluginDir)\$(ProjectName).dlu"
+    ImportLibrary="$(IntDir)\$(ProjectName).lib"
+  />
+    <Tool
+        Name="VCResourceCompilerTool"
+        AdditionalIncludeDirectories=".\NifCommon"
+    />
+  <Tool
+    Name="VCPreBuildEventTool"
+    Description="Checking Environment Variables ..."
+    CommandLine="echo If you have trouble compiling then double check the following directories are correct for your system:&#x0D;&#x0A;echo     MaxInstallDir=$(MaxInstallDir)&#x0D;&#x0A;echo     MaxPluginDir=$(MaxPluginDir)&#x0D;&#x0A;echo     MaxPlugcfgDir=$(MaxPlugcfgDir)&#x0D;&#x0A;echo     MaxSDKDir=$(MaxSDKDir)&#x0D;&#x0A;echo     TargetPath=$(TargetPath)&#x0D;&#x0A;echo ...&#x0D;&#x0A;&#x0D;&#x0A;"
+  /> 
+</VisualStudioPropertySheet>

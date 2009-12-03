@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="FBX_Settings"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		AdditionalIncludeDirectories="$(FBXSDKDir)include"
+		PreprocessorDefinitions="KFBX_PLUGIN;KFBX_FBXSDK"
+		RuntimeLibrary="3"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		AdditionalLibraryDirectories="$(FBXSDKDir)lib"
+	/>
+	<UserMacro
+		Name="FBXSDKDir"
+		Value="D:\Development\Libraries\FbxSdk\2010.2\"
+	/>
+</VisualStudioPropertySheet>
