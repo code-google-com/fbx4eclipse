@@ -149,3 +149,34 @@ static inline KFbxQuaternion ComposeSphericalXYZ(KFbxVector4 lR)
 	m4.Decompose(pos, rot, scl);
 	return KFbxQuaternion(rot.x, rot.y, rot.z, rot.w);
 }
+
+static inline KFbxXMatrix GetLocalTransformFromDefaultTake( KFbxNode * lNode )
+{
+	KFbxNode * lParent = lNode->GetParent();
+	KFbxXMatrix wm = lNode->GetGlobalFromDefaultTake();
+	if (lParent == NULL)
+	{
+		return wm;
+	}
+	else
+	{
+		KFbxXMatrix pm = lParent->GetGlobalFromDefaultTake();
+		wm = pm.Inverse() * wm;
+		return wm;
+	}
+}
+
+static inline KFbxXMatrix GetLocalTransform( KFbxNode * lNode )
+{
+	KFbxVector4 lT(0,0,0,0), lR(0,0,0,0), lS(1,1,1,0);
+	return KFbxXMatrix ( lNode->GetDefaultT(lT), lNode->GetDefaultR(lR), lNode->GetDefaultS(lS) );
+}
+
+
+static inline KFbxVector4 CalculateCenter(KFbxGeometryBase* pMesh)
+{
+	pMesh->ComputeBBox();
+	fbxDouble3 min = pMesh->BBoxMin.Get();
+	fbxDouble3 max = pMesh->BBoxMax.Get();
+	return KFbxVector4((min[0]+max[0])/2.0, (min[1]+max[1])/2.0, (min[2]+max[2])/2.0, 1.0);
+}

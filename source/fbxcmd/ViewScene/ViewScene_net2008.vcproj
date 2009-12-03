@@ -93,7 +93,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy glutx86\glut32.dll &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy humanoid.fbx &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
+				CommandLine="copy glutx86\glut32.dll &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration

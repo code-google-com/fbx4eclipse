@@ -41,6 +41,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fbxdao", "fbxcmd\Plugins\fb
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{BB04D90D-6459-41C7-A75C-2ACD01853D8A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_Docs", "_Docs", "{C818AE14-9C19-462F-989D-952CD3B2108A}"
+	ProjectSection(SolutionItems) = preProject
+		CHANGELOG.TXT = CHANGELOG.TXT
+		README.TXT = README.TXT
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SourceCodeControl) = preSolution
 		SccNumberOfProjects = 8
