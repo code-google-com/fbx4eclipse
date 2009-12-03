@@ -128,6 +128,17 @@ static inline float Average(const Vector3f& val) {
 	return (val.x + val.y + val.z) / 3.0f;
 }
 
+enum PosRotScale
+{
+	prsPos = 0x1,
+	prsRot = 0x2,
+	prsScale = 0x4,
+	prsDefault = prsPos | prsRot | prsScale,
+};
+void PosRotScaleNode(KFbxNode *n, KFbxVector4 & p, KFbxQuaternion& q, float s, PosRotScale prs = prsDefault);
+void PosRotScaleNode(KFbxNode *n, KFbxVector4 & p, KFbxQuaternion& q, KFbxVector4 & s, PosRotScale prs = prsDefault);
+void PosRotScaleNode(KFbxNode *n, KFbxXMatrix& m3, PosRotScale prs = prsDefault);
+
 #if 0
 inline KFbxXMatrix ToMatrix3(const Matrix44& mx)
 {

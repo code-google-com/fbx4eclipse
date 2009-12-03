@@ -6,14 +6,14 @@ using namespace std;
 static void HelpString(Cmd::HelpType type){
 	switch (type)
 	{
-	case Cmd::htShort: cout << "Convert - Simple import/export."; break;
+	case Cmd::htShort: cout << "Formats - Display the file formats supported by this tools."; break;
 	case Cmd::htLong:  
 		{
 			char fullName[MAX_PATH], exeName[MAX_PATH];
 			GetModuleFileName(NULL, fullName, MAX_PATH);
 			_splitpath(fullName, NULL, NULL, exeName, NULL);
 			cout << "Usage: " << exeName << " formats [-opts[modifiers]]" << endl 
-				<< "  Simply import and export." << endl
+				<< "  Display the file formats supported by this tool." << endl
 				<< endl
 				<< "<Switches>" << endl
 				<< "  v         Verbose Help (Lists specific versions)" << endl
@@ -35,9 +35,6 @@ static bool ExecuteCmd(Program &prog)
 	bool verboseHelp = false;
 
 	list<Cmd *> plugins;
-	if (argc == 0) {
-		return false;
-	}
 
 	for (int i = 0; i < argc; i++)
 	{

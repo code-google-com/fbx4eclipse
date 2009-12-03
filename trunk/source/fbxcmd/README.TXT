@@ -1,36 +1,67 @@
-             tazpn's DAO Tools 1.0
+             tazpn's DAO Tools 1.2
              =====================
 
     This packages includes an command line application for
       converting Dragon Age models from the native format
-	  to something that can be manipulated or used a reference for 
-	  non-derivative works.
-	  
-	Currently the package only converts from native MMH files to 
-	  FBX, 3DS, DAE, OBJ formats which are probably the most widely 
-	  interopable formats used in the industry.
-	  
-	  
+      to something that can be manipulated or used a reference for 
+      non-derivative works.
+      
+    Currently the package only converts from native MMH files to 
+      FBX, 3DS, DAE, OBJ formats which are probably the most widely 
+      interopable formats used in the industry.
+      
+    Included is a viewer largely derived from the Autodesk FBX SDK
+      modified slightly to support DDS files and loading MMH files 
+      directly.
+      
     Enjoy!
+
+    
+    
+Quick Start:
+  1. Use daocmd.exe or ErfEditor.exe to unpack ERF and RIM files in 
+       Dragon Age\packages\core\data
+    > daocmd erf "%ProgramFiles%\Dragon Age\packages\core\data\modelhierarchies.erf"
+    > daocmd erf "%ProgramFiles%\Dragon Age\packages\core\data\textures.erf"
+    > daocmd erf "%ProgramFiles%\Dragon Age\packages\core\textures\high\texturepack.erf"
+    
+  2. Convert MMH to FBX 
+    > fbxcmd Convert c_berkbeara_0.mmh "%TEMP%\c_berkbeara_0.fbx"
+    
+  3. Convert MMH to 3ds
+    > fbxcmd Convert c_berkbeara_0.mmh "%TEMP%\c_berkbeara_0.3ds"
+    
+  4. Convert MMH to COLLADA DAE
+    > fbxcmd Convert c_berkbeara_0.mmh "%TEMP%\c_berkbeara_0.dae"
+    
+  5. Convert MMH to Wavefront OBJ
+    > fbxcmd Convert c_berkbeara_0.mmh "%TEMP%\c_berkbeara_0.obj"
+
+  6. View Scene
+    > viewscene c_berkbeara_0.mmh 
+    > viewscene "%TEMP%\c_berkbeara_0.fbx"
+    > viewscene "%TEMP%\c_berkbeara_0.dae"
 
 TODO:
   - Convert from FBX to DAO compatable (MMH or MMH.XML files)
   - Support physics models
-  - Clean up existing 
+  - Clean up existing conversion
+  - Way too much to list here really
 
+  
 Anticipated Issues:
   - When converting from FBX files I expect a lot of 'required' information 
     will not be available so hand editing files (or additional tools) 
-	may be required to get content to work in the game.
-	
+    may be required to get content to work in the game.
+    
 
 Known Issues:
 
   - While the tools aim to support widely supported formats 3DS, FBX, DAE 
      these formats are not really transportable across in the various 3d 
-	 modeling packages in practice.  Useful information is frequently lost.
-	 
+     modeling packages in practice.  Useful information is frequently lost.
+     
   - My experience is that XSI, blender, 3ds max, MotionBuilder cannot really 
      import or export the files properly.  This seems likely to mostly due 
-	 to limitions of the importer/exporter adapters in those packages.  I aim 
-	 to get as compatible as possible but that is a very tall order.
+     to limitions of the importer/exporter adapters in those packages.  I aim 
+     to get as compatible as possible but that is a very tall order.

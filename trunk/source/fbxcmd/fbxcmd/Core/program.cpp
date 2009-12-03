@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include <stdlib.h>
 #include "program.h"
-#include "nifutils.h"
+#include "fbxutils.h"
 #include "fbxsdk.h" 
 #include "fbx_import.h" 
 using namespace std;

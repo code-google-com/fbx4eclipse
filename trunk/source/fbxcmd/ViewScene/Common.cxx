@@ -44,9 +44,56 @@
 #include <Shlwapi.h>
 #include <tchar.h>
 #pragma comment(lib, "shlwapi.lib")
+#include "../fbxcmd/Plugins/fbxcmn/KFbxLog.h"
 
-typedef std::list<std::string> stringlist;
-static std::set<HMODULE> k_plugins;
+class ConsoleLogger : public ILogListener
+{
+	HANDLE  hError;
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+public:
+	ConsoleLogger()
+	{
+		hError = GetStdHandle( STD_ERROR_HANDLE );
+		GetConsoleScreenBufferInfo( hError, &csbi );
+	}
+
+	void Message( KFbxLogLevel level, const TCHAR* strMessage )
+	{
+		switch (level)
+		{
+		case LOG_ERROR:
+			SetConsoleTextAttribute( hError, FOREGROUND_RED | FOREGROUND_INTENSITY | (csbi.wAttributes & 0x00F0) );
+			//_ftprintf( stderr, "ERROR:   %s\n", strMessage );
+			fputs(strMessage, stderr); fputs("\n", stderr);
+			SetConsoleTextAttribute( hError, csbi.wAttributes );
+			break;
+		case LOG_WARN: 
+			SetConsoleTextAttribute( hError, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY | (csbi.wAttributes & 0x00F0) );
+			//_ftprintf( stderr, "WARN:    %s\n", strMessage );
+			fputs(strMessage, stderr); fputs("\n", stderr);
+			SetConsoleTextAttribute( hError, csbi.wAttributes );
+			break;
+		case LOG_INFO:
+			SetConsoleTextAttribute( hError, csbi.wAttributes | FOREGROUND_INTENSITY);
+			//_ftprintf( stderr, "INFO:    %s\n", strMessage );
+			fputs(strMessage, stderr); fputs("\n", stderr);
+			SetConsoleTextAttribute( hError, csbi.wAttributes );
+			break;
+		case LOG_DEBUG: 
+			SetConsoleTextAttribute( hError,  (csbi.wAttributes & ~FOREGROUND_INTENSITY) );
+			//_ftprintf( stderr, "DEBUG:   %s\n", strMessage );
+			fputs(strMessage, stderr); fputs("\n", stderr);
+			SetConsoleTextAttribute( hError, csbi.wAttributes );
+			break;
+		case LOG_VERBOSE: 
+			SetConsoleTextAttribute( hError, FOREGROUND_BLUE | FOREGROUND_GREEN | (csbi.wAttributes & 0x00F0) );
+			//_ftprintf( stderr, "VERBOSE: %s\n", strMessage );
+			fputs(strMessage, stderr); fputs("\n", stderr);
+			SetConsoleTextAttribute( hError, csbi.wAttributes );
+			break;
+		}
+	}
+};
 
 struct ReaderFunctions
 {
@@ -69,6 +116,10 @@ extern "C" {
 
 	typedef int (__stdcall * UnregisterFBXPlugins) (KFbxSdkManager*);
 };
+
+typedef std::list<std::string> stringlist;
+static std::set<HMODULE> k_plugins;
+ConsoleLogger logger;
 
 
 bool FindFiles( const stringlist& list, const std::string& filespec, stringlist& files )
@@ -175,6 +226,9 @@ void InitializeSdkObjects(KFbxSdkManager*& pSdkManager, KFbxScene*& pScene)
 	//pSdkManager->LoadPluginsDirectory(lPath.Buffer(), lExtension.Buffer());
 
 	//////////////////////////////////////////////////////////////////////////
+	KFbxLog::EnableLogging(true);
+	KFbxLog::SetLogLevel( LOG_INFO );
+	KFbxLog::AddListener(&logger);
 
 	stringlist paths, plugins;
 
@@ -233,6 +287,8 @@ void InitializeSdkObjects(KFbxSdkManager*& pSdkManager, KFbxScene*& pScene)
 
 void DestroySdkObjects(KFbxSdkManager* pSdkManager)
 {
+	KFbxLog::RemoveListener(&logger);
+
 	for (std::set<HMODULE>::iterator itr = k_plugins.begin(); itr != k_plugins.end(); ++itr) {
 		HMODULE hLib = *itr;
 		if (hLib != NULL) {

@@ -395,11 +395,12 @@ struct ResourceResolver
 							KFbxLog::LogVerbose("ERF File list could not be read: %s", erfFileName.c_str() );
 							continue;
 						}
-						FileReferenceRange range = std::equal_range(refs.begin(), refs.end(), filePart.c_str(), FileReferenceEquivalence() );
-						if (range.first != range.second)
+						for ( FileReferenceIterator fitr = refs.begin(), fend = refs.end(); fitr != fend; ++fitr)
 						{
-							const FileReference& fref = *range.first;
-							return DAOStreamPtr( DAOOffsetStream::Create(erfstream, fref.offset, fref.length));
+							const FileReference& fref = *fitr;
+							if ( wcsicmp(fref.filename, filePart.c_str() ) == 0) {
+								return DAOStreamPtr( DAOOffsetStream::Create(erfstream, fref.offset, fref.length));
+							}
 						}
 					}
 				}

@@ -26,4 +26,13 @@
 
 #include <shlwapi.h>
 
+extern "C"
+{
+#include "win32config.h"
+#include <libxml/xmlmemory.h>
+#include <libxml/encoding.h>
+#include <libxml/xmlwriter.h>
+#include <libxml/parser.h>
+};
+
 //#include "common.h"

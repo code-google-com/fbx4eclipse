@@ -82,6 +82,7 @@
 #include "Texture.h"
 #include "Common.h"
 
+
 void ExitFunction();
 void CreateMenus();
 void DrawText(KString& pText);

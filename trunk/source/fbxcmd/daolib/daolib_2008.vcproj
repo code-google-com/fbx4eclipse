@@ -19,7 +19,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			ConfigurationType="4"
-			InheritedPropertySheets=".\Sheets\dao_Settings.vsprops;.\Sheets\Debug_Settings.vsprops;..\Sheets\boost.vsprops;..\Sheets\Expat.vsprops;..\Sheets\Default_Settings.vsprops"
+			InheritedPropertySheets=".\Sheets\dao_Settings.vsprops;.\Sheets\Debug_Settings.vsprops;..\Sheets\boost.vsprops;..\Sheets\Expat.vsprops;..\Sheets\Default_Settings.vsprops;..\Sheets\libxml2.vsprops"
 			CharacterSet="0"
 			>
 			<Tool
@@ -81,7 +81,7 @@
 		<Configuration
 			Name="Release|Win32"
 			ConfigurationType="4"
-			InheritedPropertySheets=".\Sheets\dao_Settings.vsprops;.\Sheets\Release_Settings.vsprops;..\Sheets\boost.vsprops;..\Sheets\Expat.vsprops;..\Sheets\Default_Settings.vsprops"
+			InheritedPropertySheets=".\Sheets\dao_Settings.vsprops;.\Sheets\Release_Settings.vsprops;..\Sheets\boost.vsprops;..\Sheets\Expat.vsprops;..\Sheets\Default_Settings.vsprops;..\Sheets\libxml2.vsprops"
 			CharacterSet="0"
 			WholeProgramOptimization="1"
 			>

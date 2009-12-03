@@ -17,6 +17,7 @@ HISTORY:
 #include "MSHFormat.h"
 #include "MAOFormat.h"
 #include <float.h>
+#include "../common/fbxconvert.h"
 
 using namespace std;
 using namespace DAO;
@@ -162,7 +163,7 @@ MSHImportImpl::MSHImportImpl( DAOReader *owner, KFbxScene* scene, KFbxStreamOpti
 
 template <typename T, typename U> 
 void AssignValue(T& dst, const U& src) {
-	K_ASSERT( !"Assigment not specified.");
+	KFBXLOG_ASSERT( !"Assigment not specified.");
 }
 
 template <typename T>  void AssignValue(T& dst, const T& src) { dst = src; }
@@ -210,6 +211,26 @@ void AssignValue(T& dst, const DECLValue& src) {
 	}
 }
 
+
+inline Vector4f GetLocalTranslation(DAO::GFF::GFFListRef list) {
+	if (list.isNull()) return Vector4f();
+	TRSLPtr val = GetFirstOfType<TRSL>(list);
+	return (!val.isNull()) ? val->get_translation() : Vector3f();
+}
+
+inline Quaternion GetLocalRotation(DAO::GFF::GFFListRef list) {
+	if (list.isNull()) return Quaternion();
+	ROTAPtr val = GetFirstOfType<ROTA>(list);
+	return (!val.isNull()) ? val->get_rotation() : Quaternion();
+}
+
+inline float GetLocalScale(DAO::GFF::GFFListRef list) {
+	if (list.isNull()) return 1.0f;
+	SCALPtr val = GetFirstOfType<SCAL>(list);
+	return (!val.isNull()) ? val->get_scale() : 1.0f;
+}
+
+
 KFbxNode *MSHImportImpl::ImportMESH(  KFbxNode* pParentNode
 									, CHNKRef chnk
 									, DAOMemStream& idxStream
@@ -254,10 +275,12 @@ KFbxNode *MSHImportImpl::ImportMESH(  KFbxNode* pParentNode
 				continue;
 
 			KFBXLOG_ASSERT( 0 == strmIdx );
-			KFBXLOG_ASSERT( 0 == decl->get_usageIndex() );
-			KFBXLOG_ASSERT( 0 == decl->get_Method() );
 			if ( 0 != strmIdx ) continue;
+			
+			KFBXLOG_ASSERT( 0 == decl->get_usageIndex() );
 			if ( 0 != decl->get_usageIndex() ) continue;
+
+			KFBXLOG_ASSERT( 0 == decl->get_Method() );
 			if ( 0 != decl->get_Method() ) continue;
 
 			switch ( decl->get_usage() )
@@ -462,6 +485,15 @@ KFbxNode *MSHImportImpl::ImportMESH(  KFbxNode* pParentNode
 			lLayer->GetMaterials()->SetReferenceMode(KFbxLayerElement::eINDEX_TO_DIRECT);
 			CreateMaterial(meshRef, pMesh);
 		}
+
+		// Set Offset
+		GFFListRef list = meshRef->get_children();
+
+		Vector4f pos = GetLocalTranslation(list);
+		Quaternion rot = GetLocalRotation(list);
+		float scl = GetLocalScale(list);
+		KFbxXMatrix m = TOMATRIX3(pos, rot, scl);
+		PosRotScaleNode(pNode, m);
 	}
 
 	pParentNode->AddChild(pNode);

@@ -45,8 +45,17 @@ bool DAOReader::FileOpen( char* pFileName )
 	{
 		KFbxLog::LogDebug("DAOReader::FileOpen(%s)", pFileName);
 
-		GetFullPathName(pFileName, filepath.max_size(), filepath.data(), NULL );
-		gffFile.open(pFileName);
+		DAOStreamPtr stream = ResourceManager::OpenStream(pFileName);
+		if (!stream.isNull() )
+		{
+			filepath = pFileName;
+			gffFile.open(*stream);
+		}
+		else
+		{
+			GetFullPathName(pFileName, filepath.max_size(), filepath.data(), NULL );
+			gffFile.open(pFileName);
+		}		
 		fileOpen = true;
 		return true;
 	}

@@ -1,37 +1,37 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioPropertySheet
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="System_Default"
-  OutputDirectory="$(SolutionDir)Staging\$(PlatformName)\$(ConfigurationName)\"
-  IntermediateDirectory="$(SolutionDir)Temp\$(ProjectName)\$(PlatformName)\$(ConfigurationName)\"
-  UseOfMFC="0"
-  ATLMinimizesCRunTimeLibraryUsage="false"
-  WholeProgramOptimization="0"
-  CharacterSet="2"
+	OutputDirectory="$(SolutionDir)Staging\$(PlatformName)\$(ConfigurationName)\"
+	IntermediateDirectory="$(SolutionDir)Temp\$(ProjectName)\$(PlatformName)\$(ConfigurationName)\"
+	UseOfMFC="0"
+	ATLMinimizesCRunTimeLibraryUsage="false"
+	CharacterSet="2"
+	WholeProgramOptimization="0"
 	>
 	<Tool
 		Name="VCCLCompilerTool"
-    AdditionalIncludeDirectories=""
-    PreprocessorDefinitions="_WINDOWS;_USRDLL;_USE_MATH_DEFINES;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS"
-    ExceptionHandling="2"
-    EnableFunctionLevelLinking="true"
-    ForceConformanceInForLoopScope="false"
-    WarningLevel="3"
-    SuppressStartupBanner="true"
-    CompileAs="0"
+		AdditionalIncludeDirectories=""
+		PreprocessorDefinitions="_WINDOWS;_USRDLL;_USE_MATH_DEFINES;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS"
+		ExceptionHandling="2"
+		EnableFunctionLevelLinking="true"
+		ForceConformanceInForLoopScope="false"
+		WarningLevel="3"
+		SuppressStartupBanner="true"
+		CompileAs="0"
+		DisableSpecificWarnings="4482"
 	/>
 	<Tool
 		Name="VCLinkerTool"
-    AdditionalDependencies="shlwapi.lib"
-    SuppressStartupBanner="true"
-    SubSystem="2"
-    BaseAddress="0x16860000"
-    ImportLibrary="$(IntDir)\$(ProjectName).lib"
-  />
-    <Tool
-        Name="VCResourceCompilerTool"
-        AdditionalIncludeDirectories=".\NifCommon"
-    />
-  
+		AdditionalDependencies="shlwapi.lib"
+		SuppressStartupBanner="true"
+		SubSystem="2"
+		BaseAddress="0x16860000"
+		ImportLibrary="$(IntDir)\$(ProjectName).lib"
+	/>
+	<Tool
+		Name="VCResourceCompilerTool"
+		AdditionalIncludeDirectories=".\NifCommon"
+	/>
 </VisualStudioPropertySheet>

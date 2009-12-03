@@ -293,7 +293,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Core\NifUtils.cpp"
+				RelativePath=".\Core\fbxutils.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -315,7 +315,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\Core\nifutils.h"
+				RelativePath=".\Core\fbxutils.h"
 				>
 			</File>
 			<File

@@ -19,7 +19,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\Sheets\fbx_Settings.vsprops;.\sheets\daolib_Settings.vsprops;..\..\..\Sheets\boost.vsprops;..\..\..\Sheets\Expat.vsprops;..\..\..\Sheets\Default_Settings.vsprops"
+			InheritedPropertySheets="..\..\Sheets\fbx_Settings.vsprops;.\sheets\daolib_Settings.vsprops;..\..\..\Sheets\boost.vsprops;..\..\..\Sheets\Expat.vsprops;..\..\..\Sheets\Default_Settings.vsprops;..\..\..\Sheets\libxml2.vsprops"
 			CharacterSet="0"
 			>
 			<Tool
@@ -94,7 +94,7 @@
 		<Configuration
 			Name="Release|Win32"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\Sheets\fbx_Settings.vsprops;.\sheets\daolib_Settings.vsprops;..\..\..\Sheets\Expat.vsprops;..\..\..\Sheets\Default_Settings.vsprops;..\..\..\Sheets\boost.vsprops"
+			InheritedPropertySheets="..\..\Sheets\fbx_Settings.vsprops;.\sheets\daolib_Settings.vsprops;..\..\..\Sheets\Expat.vsprops;..\..\..\Sheets\Default_Settings.vsprops;..\..\..\Sheets\boost.vsprops;..\..\..\Sheets\libxml2.vsprops"
 			CharacterSet="0"
 			WholeProgramOptimization="1"
 			>
@@ -228,7 +228,23 @@
 			Name="Exporter"
 			>
 			<File
+				RelativePath=".\exporter\exporterBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\exporter\exporterBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\exporter\exportMMH.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\exporter\writer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\exporter\writer.h"
 				>
 			</File>
 		</Filter>
@@ -306,6 +322,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\common\fbxconvert.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\common\fbxconvert.h"
 				>
 			</File>
@@ -340,7 +360,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="xcopy /Y /D &quot;$(InputPath)&quot; &quot;$(OutDir)\plugcfg\&quot;"
+					CommandLine="xcopy /Y /D &quot;$(InputPath)&quot; &quot;$(OutDir)\plugcfg\&quot;&#x0D;&#x0A;"
 					Outputs="$(OutDir)\plugcfg\$(InputFileName)"
 				/>
 			</FileConfiguration>

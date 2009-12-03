@@ -20,14 +20,6 @@ HISTORY:
 #include <tchar.h>
 #include <sstream>
 #include <strstream>
-//
-////#define DllExport
-//#ifdef _DEBUG
-//#define ASSERT(x) { if (!(x) && IsDebuggerPresent()) __asm { int 3 }; }
-//WINBASEAPI BOOL WINAPI IsDebuggerPresent( VOID );
-//#else
-//#define ASSERT(x)
-//#endif
 
 #ifndef _countof
 #  define _countof(x) (sizeof(x)/sizeof(x[0]))

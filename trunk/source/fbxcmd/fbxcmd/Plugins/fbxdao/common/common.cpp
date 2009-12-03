@@ -63,10 +63,9 @@ bool FindMatchingFiles( LPCTSTR match, stringlist& result )
 		strcpy(path, match);
 		PathRemoveFileSpec(path);
 
-		bool ok = false;
 		HANDLE hFind = FindFirstFile(match, &FindFileData);
 		if (hFind != INVALID_HANDLE_VALUE) {
-			for (BOOL ok = TRUE ; ok ; ok = FindNextFile(hFind, &FindFileData)) {
+			for (BOOL next = TRUE ; next ; next = FindNextFile(hFind, &FindFileData)) {
 				PathCombine(filebuf, path, FindFileData.cFileName);
 				GetFullPathName(filebuf, _countof(resultbuf), resultbuf, NULL);
 				result.push_back(_tstring(resultbuf));
